@@ -186,7 +186,7 @@ function buildCoverage(): ContentCoverage {
       </section>
     </div>
 
-    <section class="home-section" aria-labelledby="coverage-title">
+    <section class="home-section home-appendix" aria-labelledby="coverage-title">
       <h2 id="coverage-title">内容完整度</h2>
       <p>按模块看正文写到哪了。这不是你的学习进度。已发布的节可以直接打开，其余还在目录里。</p>
       <p class="meta coverage-summary">{{ coverage.summary }}</p>

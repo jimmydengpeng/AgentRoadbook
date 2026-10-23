@@ -231,6 +231,62 @@
   text-decoration: underline;
 }
 
+.home-appendix {
+  padding-top: var(--home-8);
+  color: var(--vp-c-text-2);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.home-section.home-appendix h2 {
+  margin-bottom: 8px;
+  font-size: 15px;
+  font-weight: 650;
+  color: var(--vp-c-text-2);
+}
+
+.home-section.home-appendix > p {
+  margin-bottom: 8px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.home-appendix .road-index {
+  color: var(--vp-c-text-2);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.home-appendix .coverage > li {
+  grid-template-columns: 36px 1fr;
+  gap: 12px;
+  padding: 12px 0;
+}
+
+.home-appendix .coverage-head a,
+.home-appendix .coverage-links a {
+  color: var(--vp-c-text-2);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.home-appendix .coverage-links {
+  font-size: 12px;
+}
+
+.home-appendix .coverage-links a {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.home-appendix .coverage-count {
+  font-size: 12px;
+}
+
+.home-appendix .meter {
+  height: 4px;
+}
+
 .home-panels {
   display: flex;
   flex-direction: column;
