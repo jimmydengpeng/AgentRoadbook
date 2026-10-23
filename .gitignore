@@ -1,0 +1,12 @@
+node_modules/
+dist/
+docs/.vitepress/cache/
+docs/.vitepress/dist/
+.DS_Store
+*.local
+.env
+.env.*
+!.env.example
+
+# 私有参考资料。不要加入版本库，也不要打进网站产物。
+raw/

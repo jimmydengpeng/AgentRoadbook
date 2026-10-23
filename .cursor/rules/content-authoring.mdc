@@ -1,0 +1,20 @@
+---
+description: Agent Roadbook 的内容维护约定，避免重复知识点、公开 raw 资料和跳过校验
+alwaysApply: true
+---
+
+# 内容维护
+
+- 知识点以 `docs/**/*.md` 的 Frontmatter 为准。侧边栏在 VitePress 启动时由它生成，改完后要重新运行 dev。
+- 练习放在 `quizzes/<topic-id>.yaml`，用知识点 ID 关联。不要把题目写进 Vue 组件。
+- `/raw` 是未授权的私有参考。不要复制到文档、题目、项目、示例或构建产物，也不要加入 Git。
+- 新增知识点：确定模块、写 Markdown Frontmatter、补 1 到 5 道题、在 `sources/index.yaml` 登记引用过的链接、运行 `pnpm validate`、`pnpm test` 和 `pnpm build`。
+- 已有知识点先搜索 ID 和标题，不要平行再建一节。
+- AI 新写的正文使用 `status: draft`。不要把 `reviewed` 或 `published` 改回去，除非用户明确要求重写。
+- 不编造来源、运行结果或性能数字。官方文档优先于笔记。
+
+```text
+把 raw 笔记原样贴进 docs
+
+用自己的话写解释，只引用已核实的官方文档，并跑校验
+```

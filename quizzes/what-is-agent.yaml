@@ -1,0 +1,30 @@
+topicId: what-is-agent
+questions:
+  - id: what-is-agent-choice-1
+    topicId: what-is-agent
+    type: choice
+    difficulty: beginner
+    prompt: 按本站的工程定义，哪一项更接近 AI Agent，而不是单轮聊天？
+    options:
+      - id: a
+        text: 把用户的一句话交给模型，模型返回文字后程序就结束
+      - id: b
+        text: 模型可以提出下一步动作，程序执行后再把结果交回，直到满足停止条件
+      - id: c
+        text: 把文档切成小块存进数据库
+      - id: d
+        text: 把采样温度调高，让回答更有变化
+    answer: b
+    explanation: 单轮补全只完成一次文本映射。本站说的 Agent 包含模型、可执行动作和由程序控制的循环。切分文档是 RAG 的步骤，采样温度只影响生成，不增加行动。
+  - id: what-is-agent-short-1
+    topicId: what-is-agent
+    type: short
+    difficulty: beginner
+    prompt: 一个固定的三步流水线，依次检索、拼提示词、生成回答。为什么它通常还不叫本站所说的 Agent？
+    note: 用自己的话写。没有标准措辞，对照要点即可。
+    reference: 这三步的顺序是人事先写死的，模型没有在运行时选择下一步动作。它主要在最后一步把已定好的输入写成文字。如果模型可以决定是否检索、调用哪个工具以及何时停止，才进入本站的 Agent 定义。流水线更稳定时，不必为了名称改成循环。
+    rubric:
+      - 指出步骤顺序是预先写死的
+      - 说明模型没有选择下一步动作
+      - 提到工具选择或停止条件至少其中一项
+      - 没有把所有带模型的程序都叫做 Agent

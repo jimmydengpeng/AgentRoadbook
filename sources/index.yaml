@@ -1,0 +1,178 @@
+sources:
+  - id: private-bilibili-notes
+    title: 大模型 Agent 学习笔记导出
+    path: raw/大模型Agent开发学习资料参考文档【B站】/feishu.md
+    author: 未核实
+    type: paid-notes
+    topics: []
+    verification: restricted
+    license: 未授权，仅供本地参考
+    publish: false
+    notes: 付费笔记的本地导出，包含个人学习与面试记录。不得复制进站点或构建产物，也不要加入 Git。
+  - id: python-tutorial
+    title: Python 教程
+    url: https://docs.python.org/3/tutorial/
+    author: Python Software Foundation
+    type: official-doc
+    topics:
+      - guide-environment
+      - python-basics
+    verification: verified
+    license: Python 文档使用说明以官网为准
+    publish: true
+    notes: Python 官方教程，环境准备页用来核对版本和基本语法入口。
+  - id: python-venv
+    title: venv
+    url: https://docs.python.org/3/library/venv.html
+    author: Python Software Foundation
+    type: official-doc
+    topics:
+      - guide-environment
+    verification: verified
+    license: Python 文档使用说明以官网为准
+    publish: true
+    notes: 虚拟环境的标准库文档。
+  - id: python-json
+    title: json
+    url: https://docs.python.org/3/library/json.html
+    author: Python Software Foundation
+    type: official-doc
+    topics:
+      - json-data
+      - agent-tool-calling
+    verification: verified
+    license: Python 文档使用说明以官网为准
+    publish: true
+    notes: 工具参数解析使用的标准库。
+  - id: python-asyncio
+    title: asyncio
+    url: https://docs.python.org/3/library/asyncio.html
+    author: Python Software Foundation
+    type: official-doc
+    topics:
+      - python-async
+    verification: verified
+    license: Python 文档使用说明以官网为准
+    publish: true
+    notes: 异步编程章节的官方入口。
+  - id: mdn-http
+    title: HTTP 概述
+    url: https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Overview
+    author: MDN
+    type: official-doc
+    topics:
+      - http-rest
+    verification: verified
+    license: CC-BY-SA 2.5
+    publish: true
+    notes: HTTP 基础的公开参考。
+  - id: pydantic-docs
+    title: Pydantic 文档
+    url: https://docs.pydantic.dev/latest/
+    author: Pydantic
+    type: official-doc
+    topics:
+      - pydantic
+    verification: verified
+    license: 以项目文档许可为准
+    publish: true
+    notes: 数据校验章节的官方文档。
+  - id: fastapi-docs
+    title: FastAPI 文档
+    url: https://fastapi.tiangolo.com/
+    author: FastAPI
+    type: official-doc
+    topics:
+      - fastapi-service
+    verification: verified
+    license: 以项目文档许可为准
+    publish: true
+    notes: 把 Agent 包成 HTTP 服务时的官方文档。
+  - id: openai-function-calling
+    title: OpenAI Function calling
+    url: https://platform.openai.com/docs/guides/function-calling
+    author: OpenAI
+    type: official-doc
+    topics:
+      - agent-tool-calling
+    verification: verified
+    license: OpenAI 文档条款
+    publish: true
+    notes: 工具调用消息结构的一个常见实现说明。
+  - id: openai-structured-outputs
+    title: OpenAI Structured Outputs
+    url: https://platform.openai.com/docs/guides/structured-outputs
+    author: OpenAI
+    type: official-doc
+    topics:
+      - structured-output
+    verification: verified
+    license: OpenAI 文档条款
+    publish: true
+    notes: 结构化输出的官方说明。
+  - id: anthropic-tool-use
+    title: Anthropic Tool use
+    url: https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview
+    author: Anthropic
+    type: official-doc
+    topics:
+      - agent-tool-calling
+    verification: verified
+    license: Anthropic 文档条款
+    publish: true
+    notes: 另一家服务商的工具调用说明，用来对照消息格式可以不同、责任划分相同。
+  - id: mcp-introduction
+    title: Model Context Protocol 介绍
+    url: https://modelcontextprotocol.io/introduction
+    author: MCP
+    type: official-doc
+    topics:
+      - mcp
+    verification: verified
+    license: 以协议站点为准
+    publish: true
+    notes: MCP 的项目介绍。
+  - id: langchain-overview
+    title: LangChain 概览
+    url: https://docs.langchain.com/oss/python/langchain/overview
+    author: LangChain
+    type: official-doc
+    topics:
+      - langchain
+    verification: verified
+    license: 以项目文档许可为准
+    publish: true
+    notes: LangChain Python 文档入口。
+  - id: langgraph-overview
+    title: LangGraph 概览
+    url: https://docs.langchain.com/oss/python/langgraph/overview
+    author: LangChain
+    type: official-doc
+    topics:
+      - langgraph
+    verification: verified
+    license: 以项目文档许可为准
+    publish: true
+    notes: LangGraph 文档入口。
+  - id: rag-paper
+    title: Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks
+    url: https://arxiv.org/abs/2005.11401
+    author: Patrick Lewis 等
+    type: paper
+    topics:
+      - rag-basics
+    verification: verified
+    license: arXiv 论文，引用时保留出处
+    publish: true
+    notes: RAG 这一名称的来源论文。站点只引用结论方向，不复制论文正文。
+  - id: react-paper
+    title: "ReAct: Synergizing Reasoning and Acting in Language Models"
+    url: https://arxiv.org/abs/2210.03629
+    author: Shunyu Yao 等
+    type: paper
+    topics:
+      - react
+    verification: verified
+    license: arXiv 论文，引用时保留出处
+    publish: true
+    notes: ReAct 论文。站点只说明它要交替推理和行动，不复制实验数据。

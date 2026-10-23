@@ -1,0 +1,47 @@
+# 模块顺序决定侧边栏。知识点写在 docs 对应目录里，不要在这里列举。
+modules:
+  - id: guide
+    title: 开始学习
+    description: 认识这本路书、安排学习顺序，并准备本地环境
+    dir: guide
+    order: 1
+  - id: fundamentals
+    title: 编程与大模型基础
+    description: 补齐 Python、HTTP、数据校验和模型调用
+    dir: fundamentals
+    order: 2
+  - id: agent
+    title: Agent 核心原理
+    description: 从一次对话走到会选择工具的行动循环
+    dir: agent
+    order: 3
+  - id: rag
+    title: RAG 与知识库
+    description: 让回答基于你自己的资料，而不是只靠参数记忆
+    dir: rag
+    order: 4
+  - id: memory
+    title: Memory 与上下文工程
+    description: 管理对话、记忆，以及有限的上下文窗口
+    dir: memory
+    order: 5
+  - id: frameworks
+    title: Agent 框架与协议
+    description: 了解 LangChain、LangGraph、MCP，并知道何时不用框架
+    dir: frameworks
+    order: 6
+  - id: engineering
+    title: Agent 工程化
+    description: 把 Agent 做成可观察、可测试、可部署的服务
+    dir: engineering
+    order: 7
+  - id: projects
+    title: 实战项目
+    description: 用可以验收的任务把前面的知识串起来
+    dir: projects
+    order: 8
+  - id: resources
+    title: 学习资源
+    description: 官方文档、论文和本站使用的术语
+    dir: resources
+    order: 9

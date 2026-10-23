@@ -1,0 +1,29 @@
+topicId: rag-basics
+questions:
+  - id: rag-basics-choice-1
+    topicId: rag-basics
+    type: choice
+    difficulty: beginner
+    prompt: RAG 的回答和资料对不上时，最先应该检查什么？
+    options:
+      - id: a
+        text: 先换一个参数更大的模型
+      - id: b
+        text: 先看检索结果里有没有回答所需的事实
+      - id: c
+        text: 把温度调到 0，检索错误就会消失
+      - id: d
+        text: 不再检索，把所有文档一次性粘进提示词
+    answer: b
+    explanation: 生成只能使用这次放进提示词的片段。片段里没有事实时，换模型或调整温度都不能把没检索到的句子变出来。把全部文档粘进去会受上下文长度限制，也不再是按相关性检索。
+  - id: rag-basics-short-1
+    topicId: rag-basics
+    type: short
+    difficulty: beginner
+    prompt: 用自己的话说明 RAG 里检索和生成各做什么，以及为什么回答要带来源。
+    reference: 检索从已经索引的资料中找出与问题相关的片段。生成把问题和这些片段交给模型，写出给用户的回答。来源让人能回到原文核对。检索没有命中时，应该说明资料不足，而不是编一个看起来真实的出处。
+    rubric:
+      - 检索负责找片段，生成负责写回答
+      - 提到模型看不到没有取回的文档
+      - 说明来源是为了核对，而不是装饰
+      - 提到资料不足时不应该编造

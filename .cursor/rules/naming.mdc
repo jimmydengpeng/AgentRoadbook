@@ -1,0 +1,17 @@
+---
+description: 用职责命名，并沿用邻近代码里已有的词
+alwaysApply: true
+---
+
+# 命名
+
+- 先沿用当前文件和邻近模块已有的词，再起新名字。
+- 类型、模块、文件用名词。函数和命令用动词。
+- 布尔值用 `is`、`has`、`can` 开头，读出来是一个判断。
+- 名字写清职责：`order` 比 `data` 清楚，`saveOrder` 比 `handle` 清楚。
+- 缩写只在本仓库已经通用时使用，例如 `id`、`url`。
+
+```text
+process(data)     # 看不出处理的是什么
+saveOrder(order)  # 动作和对象都明确
+```

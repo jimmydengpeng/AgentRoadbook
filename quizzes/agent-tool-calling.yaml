@@ -1,0 +1,75 @@
+topicId: agent-tool-calling
+questions:
+  - id: agent-tool-calling-choice-1
+    topicId: agent-tool-calling
+    type: choice
+    difficulty: beginner
+    prompt: 在工具调用流程里，谁真正执行你注册的函数？
+    options:
+      - id: a
+        text: 模型在服务商那边直接运行你的 Python 函数
+      - id: b
+        text: 应用程序根据模型返回的名字和参数执行函数，再把结果交回模型
+      - id: c
+        text: 向量数据库在检索时自动执行函数
+      - id: d
+        text: 浏览器看到 JSON 后会自己调用本地函数
+    answer: b
+    explanation: 模型只产生结构化的调用请求。执行、超时、权限和错误文本都在应用程序一侧。因此换模型服务商时，工具函数可以保留，需要替换的是解析那一种消息格式的代码。
+  - id: agent-tool-calling-short-1
+    topicId: agent-tool-calling
+    type: short
+    difficulty: beginner
+    prompt: 说明工具调用里模型和应用各负责什么。请提到参数不合法时应该发生什么。
+    note: 不需要写特定厂商的字段名。
+    reference: 模型根据对话和工具说明决定是否调用、调用哪一个，以及参数是什么。应用程序登记工具、检查参数、执行函数，并把结果写回消息。参数不是合法的 JSON 对象，或工具名没有注册时，应用程序不应执行函数，而要返回可以区分的错误。模型不因此获得你的数据库权限。
+    rubric:
+      - 模型负责选择工具和填写参数
+      - 应用负责执行并把结果交回
+      - 提到未知工具或非法参数要被拒绝
+      - 没有把密钥或数据库权限交给模型
+  - id: agent-tool-calling-code-1
+    topicId: agent-tool-calling
+    type: code
+    difficulty: beginner
+    prompt: 实现 dispatch_tool。它从注册表里按名字找到函数，用 JSON 对象里的参数调用它，并返回字符串结果。
+    examples:
+      - input: "工具 get_time(city)，参数 {\"city\": \"杭州\"}"
+        output: 杭州 12:00
+      - input: "工具名 missing，参数 {}"
+        output: 抛出 KeyError，且不执行任何工具
+      - input: "参数是 JSON 数组 []"
+        output: 抛出 ValueError
+    starter: |
+      import json
+      from collections.abc import Callable
+
+      Tool = Callable[..., str]
+
+      def dispatch_tool(registry: dict[str, Tool], name: str, arguments_json: str) -> str:
+          """执行 registry 中名为 name 的工具。
+
+          arguments_json 必须是 JSON 对象。未知工具、非法 JSON 和非对象参数都要抛出清晰的异常。
+          """
+          raise NotImplementedError
+    hint: 先判断名字是否存在，再用 json.loads 解析。确认结果是 dict 后，调用 registry[name](**arguments)。未知工具用 KeyError，JSON 问题用 ValueError，并保留原始解析错误。
+    solution: |
+      import json
+      from collections.abc import Callable
+
+      Tool = Callable[..., str]
+
+      def dispatch_tool(registry: dict[str, Tool], name: str, arguments_json: str) -> str:
+          if name not in registry:
+              raise KeyError(f"unknown tool: {name}")
+          try:
+              arguments = json.loads(arguments_json)
+          except json.JSONDecodeError as error:
+              raise ValueError(f"invalid tool arguments for {name}") from error
+          if not isinstance(arguments, dict):
+              raise ValueError(f"tool arguments must be a JSON object for {name}")
+          result = registry[name](**arguments)
+          if not isinstance(result, str):
+              raise TypeError(f"tool {name} must return str")
+          return result
+    run: 把函数保存到本地文件后，用三个断言分别检查正常调用、未知工具和 JSON 数组。也可以在仓库根目录运行 python examples/tool_dispatch.py，看到 ok 表示参考实现通过了自检。做题时先不要打开那份参考文件。
