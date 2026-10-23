@@ -1,0 +1,64 @@
+topicId: agent-observability
+questions:
+  - id: agent-observability-choice-1
+    topicId: agent-observability
+    type: choice
+    difficulty: intermediate
+    prompt: 步骤的 detail 里含有调用方传入的密钥。record_step 应怎样处理这条日志？
+    options:
+      - id: a
+        text: 原样追加，方便以后对照请求
+      - id: b
+        text: 抛出 ValueError，日志列表保持原样
+      - id: c
+        text: 把 status 改成 ok 之后追加
+      - id: d
+        text: 追加一条没有 name 的记录表示已遮盖
+    answer: b
+    explanation: 普通字段里的密钥不会被字段名遮盖规则处理。函数抛出 ValueError，并且不把这一条追加进日志。
+  - id: agent-observability-short-1
+    topicId: agent-observability
+    type: short
+    difficulty: intermediate
+    prompt: 一条可以回放的步骤要有哪些字段？密钥出现在 api_key 和出现在 detail 时，调用方各看到什么？
+    note: 按本页的列表日志写，不需要某个追踪产品的字段名。
+    reference: 每一步要有 name，并且 status 只能是 ok 或 error。api_key 这类密钥字段写成 [redacted]，日志里看不到原来的值。detail 里若仍有密钥，record_step 抛出 ValueError，这一条不会追加，已有日志不变。
+    rubric:
+      - 记录包含 name 和可区分的 status
+      - 密钥字段的值变成 [redacted]
+      - 普通字段残留密钥时抛出 ValueError
+      - 拒绝时不会追加这一条
+  - id: agent-observability-code-1
+    topicId: agent-observability
+    type: code
+    difficulty: intermediate
+    prompt: 实现 record_step。缺少 name，或 status 不是 ok 或 error 时抛出 ValueError。api_key、authorization、secret、token、password 的值写成 [redacted]。若传入的密钥仍出现在遮盖后的任何值里，抛出 ValueError 且不追加。不要访问网络。
+    examples:
+      - input: 空日志，步骤 name 为 lookup、status 为 ok、api_key 为 test-secret，secret 参数也是 test-secret
+        output: 日志有一条，api_key 为 [redacted]，看不到 test-secret
+      - input: detail 为「see test-secret」，并传入同一串密钥
+        output: 抛出 ValueError，日志仍为空
+      - input: 只有 name、没有 status
+        output: 抛出 ValueError
+    starter: |
+      def record_step(log: list[dict[str, str]], step: dict[str, str], secret: str = "") -> None:
+          """遮盖密钥后再追加。无法区分成败或仍泄漏密钥时抛出 ValueError。"""
+          raise NotImplementedError
+    hint: 先看 name 和 status。再按字段名把密钥字段换成 [redacted]。如果 secret 非空并且还出现在任何一个值里，在 append 之前抛出。异常文本不要包含密钥。
+    solution: |
+      def record_step(log: list[dict[str, str]], step: dict[str, str], secret: str = "") -> None:
+          hidden = {"api_key", "authorization", "secret", "token", "password"}
+          name = step.get("name", "")
+          status = step.get("status", "")
+          if not name or status not in {"ok", "error"}:
+              raise ValueError("日志缺少 name 或无法区分的 status")
+          cleaned: dict[str, str] = {}
+          for key, value in step.items():
+              if key.lower() in hidden:
+                  cleaned[key] = "[redacted]"
+              else:
+                  cleaned[key] = value
+          if secret and any(secret in value for value in cleaned.values()):
+              raise ValueError("日志里出现了密钥")
+          log.append(cleaned)
+    run: 本地从空列表记一条带 api_key 的成功步骤，列表里该字段应为 [redacted]。detail 含有同一密钥时应抛出 ValueError，列表长度不变。缺少 status 时也应抛出 ValueError。页面不会执行这段代码。

@@ -1,0 +1,30 @@
+topicId: long-term-memory
+questions:
+  - id: long-term-memory-choice-1
+    topicId: long-term-memory
+    type: choice
+    difficulty: intermediate
+    prompt: 从存储取回一条记忆后，放进当前用户的这次请求之前，应用要先做什么？
+    options:
+      - id: a
+        text: 直接拼接，存储里的记录都可以给当前用户看
+      - id: b
+        text: 核对记录上的用户标识和当前用户一致，不一致就不放进请求
+      - id: c
+        text: 只要文本相近就放进去，不需要看用户标识
+      - id: d
+        text: 删掉用户标识再放入，避免请求里出现用户编号
+    answer: b
+    explanation: 跨会话取回的记录可能来自别的用户，相近也不证明归属。用户标识对不上时，函数不返回那段文字，它就不能进入这次请求。
+  - id: long-term-memory-short-1
+    topicId: long-term-memory
+    type: short
+    difficulty: intermediate
+    prompt: 存储里有 u1 的「偏好无糖」和 u2 的「偏好红茶」。当前用户是 u1。哪一条可以放进这次请求？另一条取回之后应怎样处理？
+    note: 说明归属检查的结果，不要假设相似度可以代替用户标识。
+    reference: u1 的「偏好无糖」通过归属检查，可以放进这次请求。u2 的「偏好红茶」即使用相近的方式取回，也要拒绝放入 u1 的请求。记录可以留在存储里，但函数不应返回那段文字。
+    rubric:
+      - 「偏好无糖」可以进入 u1 的这次请求
+      - 「偏好红茶」不能进入 u1 的请求
+      - 取回之后仍要核对用户标识
+      - 没有用相似度代替归属检查

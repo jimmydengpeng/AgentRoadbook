@@ -1,0 +1,30 @@
+topicId: llm-basics
+questions:
+  - id: llm-basics-choice-1
+    topicId: llm-basics
+    type: choice
+    difficulty: beginner
+    prompt: 一次聊天补全在做什么？
+    options:
+      - id: a
+        text: 在你的电脑上把模型参数重新训练一遍
+      - id: b
+        text: 把这次的消息交给模型，模型生成一段新的文本
+      - id: c
+        text: 把文档切成小块后写入数据库
+      - id: d
+        text: 由模型直接执行你机器上的 Python 函数
+    answer: b
+    explanation: 补全是根据这次请求里的消息生成新文本。训练参数、切分文档和执行本地函数都不是这一次生成本身。
+  - id: llm-basics-short-1
+    topicId: llm-basics
+    type: short
+    difficulty: beginner
+    prompt: 用自己的话说明提示词和补全各是什么，以及为什么同一份提示词可能得到不同文字。
+    note: 用自己的话写。没有标准措辞，对照要点即可。
+    reference: 提示词是这次交给模型的指令和材料。补全是模型新生成的文本。生成不是固定查表，同一份输入再次发送，文字可以不同。因此需要稳定的部分要用程序检查，不能假设原话永远复现。
+    rubric:
+      - 提示词是交给模型的指令和材料
+      - 补全是模型新生成的文本
+      - 提到同一次输入可以产生不同输出
+      - 没有把补全说成模型改写了本地文件或执行了代码

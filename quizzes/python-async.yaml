@@ -1,0 +1,29 @@
+topicId: python-async
+questions:
+  - id: python-async-choice-1
+    topicId: python-async
+    type: choice
+    difficulty: intermediate
+    prompt: 只定义了 async def 的函数，直接调用它并且没有 await，得到的是什么？
+    options:
+      - id: a
+        text: 函数体已经执行完，返回值是字符串
+      - id: b
+        text: 一个尚未执行函数体的协程对象
+      - id: c
+        text: 一个新的操作系统线程
+      - id: d
+        text: 一份已经解析好的 JSON 对象
+    answer: b
+    explanation: 调用协程函数得到协程对象，函数体要等到 await 或由事件循环驱动时才执行。它不会因此变成线程，也不会自动把结果解析成 JSON。
+  - id: python-async-short-1
+    topicId: python-async
+    type: short
+    difficulty: intermediate
+    prompt: 为什么等待模型响应的函数经常写成协程？请说明 await 期间发生的事。
+    note: 不需要写某个服务商的客户端名字。
+    reference: 模型请求要等待网络，属于 IO。协程在 await 时把控制权交回事件循环，循环可以推进其他任务。asyncio 就是用来写这种并发的。如果在协程里调用会一直占住线程的同步请求，等待期间循环无法切换。
+    rubric:
+      - 提到等待网络或其他 IO
+      - 说明 await 期间控制权回到事件循环
+      - 提到同步阻塞调用会占住线程或循环

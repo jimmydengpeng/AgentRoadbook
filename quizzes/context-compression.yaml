@@ -1,0 +1,71 @@
+topicId: context-compression
+questions:
+  - id: context-compression-choice-1
+    topicId: context-compression
+    type: choice
+    difficulty: intermediate
+    prompt: 为了给这一轮请求腾出空间，头部被换成更短的文字。这段更短的文字是什么？
+    options:
+      - id: a
+        text: 被换掉的原文逐字副本，只是换了个变量名
+      - id: b
+        text: 丢掉细节之后换来的文本，它不是被替换的原文
+      - id: c
+        text: 模型权重里的一段参数
+      - id: d
+        text: 空字符串，表示原文仍全部在这次请求里
+    answer: b
+    explanation: 压缩用更短的文本替换较早的细节。返回值不是那些原句。原句若还要核对，留在调用方的原列表里，而不是留在这次请求里。
+  - id: context-compression-short-1
+    topicId: context-compression
+    type: short
+    difficulty: intermediate
+    prompt: 消息是「订了周一」「改到周二」「最终周三」，保留最后 1 条，摘要是「日期改过两次」。返回值是什么？原列表里的前两句还在不在？摘要能不能改成「订了周一」？
+    note: 按本页的压缩函数说明，不要写某个模型的窗口长度。
+    reference: 返回值是「日期改过两次」和「最终周三」。前两句仍在传入的原列表里，不在返回值里。摘要若等于被替换的原文「订了周一」，函数会拒绝。
+    rubric:
+      - 返回值包含摘要和「最终周三」
+      - 前两句留在原列表，不在返回值里
+      - 摘要不能是被替换的原文
+      - 没有把压缩结果说成原文副本
+  - id: context-compression-code-1
+    topicId: context-compression
+    type: code
+    difficulty: intermediate
+    prompt: 实现 compress_head。keep_tail 为负时抛出 ValueError。keep_tail 大于等于消息条数时，返回原列表的副本且不插入摘要。否则用 summary 换掉头部，并保留尾部原句。summary 为空、等于某一条被换掉的原文、或等于这些原文按换行拼回去的结果时，抛出 ValueError。不要修改传入列表，也不要访问网络。
+    examples:
+      - input: "消息为订了周一、改到周二、最终周三，keep_tail 为 1，summary 为日期改过两次"
+        output: "日期改过两次、最终周三"
+      - input: "同上三句，keep_tail 为 1，summary 为订了周一"
+        output: 抛出 ValueError
+      - input: "同上三句，keep_tail 为 3，summary 为日期改过两次"
+        output: "订了周一、改到周二、最终周三"
+      - input: "同上三句，keep_tail 为 0，summary 为只剩摘要"
+        output: 只有「只剩摘要」
+      - input: "同上三句，keep_tail 为 -1，summary 为日期改过两次"
+        output: 抛出 ValueError
+    starter: |
+      def compress_head(messages: list[str], keep_tail: int, summary: str) -> list[str]:
+          """用 summary 换掉头部，保留最后 keep_tail 条原文。
+
+          keep_tail 为负时抛出 ValueError。
+          keep_tail 大于等于 len(messages) 时返回副本，不插入 summary。
+          summary 为空，或与被替换原文相同（含换行拼回）时抛出 ValueError。
+          不修改传入的 messages。
+          """
+          raise NotImplementedError
+    hint: 先拒绝负数。若 keep_tail 已经盖住全部消息，返回 list(messages)。否则再检查 summary 非空，并取出将被换掉的头部。summary 在头部里，或等于头部用换行拼起来的字符串时，抛出 ValueError。keep_tail 为 0 时尾部用空列表，避免 [-0:] 取到全部消息。
+    solution: |
+      def compress_head(messages: list[str], keep_tail: int, summary: str) -> list[str]:
+          if keep_tail < 0:
+              raise ValueError("keep_tail 不能为负")
+          if keep_tail >= len(messages):
+              return list(messages)
+          if not summary:
+              raise ValueError("缺少 summary")
+          dropped = messages[: len(messages) - keep_tail]
+          if summary in dropped or summary == "\n".join(dropped):
+              raise ValueError("压缩文本不能是被替换的原文")
+          tail = messages[-keep_tail:] if keep_tail else []
+          return [summary, *tail]
+    run: 把函数保存到本地后按五个例子检查。保留最后一条时，返回值是摘要加「最终周三」，原列表仍是三句。摘要等于被丢掉的原句时抛出 ValueError。keep_tail 盖住全部消息时返回三句原文的副本。keep_tail 为 0 时只返回摘要。keep_tail 为负时抛出 ValueError。页面不会执行这段代码。

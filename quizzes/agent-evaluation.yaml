@@ -1,0 +1,57 @@
+topicId: agent-evaluation
+questions:
+  - id: agent-evaluation-choice-1
+    topicId: agent-evaluation
+    type: choice
+    difficulty: intermediate
+    prompt: 样本里没有 expected_tool。grade_case 应怎样结束？
+    options:
+      - id: a
+        text: 返回 passed 为真，表示没有可对照的错误
+      - id: b
+        text: 抛出 ValueError，不产生通过或未通过
+      - id: c
+        text: 返回 passed 为假，并计入未通过条数
+      - id: d
+        text: 返回 total 为 0 的汇总，表示评估已经完成
+    answer: b
+    explanation: 缺字段表示对照还不能做。grade_case 抛出 ValueError，这条不会变成 passed 为真或为假的评分行。
+  - id: agent-evaluation-short-1
+    topicId: agent-evaluation
+    type: short
+    difficulty: intermediate
+    prompt: 自动检查怎样判断工具和答案？需要人工的样本为什么不要放进 summarize？空列表又应怎样？
+    note: 不要写百分比或外部评测分数。
+    reference: 工具名和最终答案分别对照，两项都一致时 passed 才为真。只对了一项时，调用方仍能看到另一项为假。needs_human 为 yes 的样本留在自动汇总之外。summarize 收到空列表时抛出 ValueError，返回的 total 和 passed 只描述传入的那些行。
+    rubric:
+      - 工具和答案分开对照
+      - 两项都对才算通过
+      - 人工样本不进入自动汇总
+      - 没有行时抛出错误而不是通过为零
+  - id: agent-evaluation-code-1
+    topicId: agent-evaluation
+    type: code
+    difficulty: intermediate
+    prompt: 实现 grade_case。样本缺少 expected_tool 或 expected_answer，或结果缺少 tool 或 final 时抛出 ValueError。否则返回 tool_ok、answer_ok 和 passed。passed 仅在两项都为真时为真。不要访问网络，也不要计算百分比。
+    examples:
+      - input: 期待工具 lookup_note、答案「本地笔记」，结果的工具和答案都相同
+        output: tool_ok、answer_ok、passed 都为真
+      - input: 答案相同，但结果工具是 other
+        output: tool_ok 为假，answer_ok 为真，passed 为假
+      - input: 样本没有 expected_tool
+        output: 抛出 ValueError，文本为「样本缺少 expected_tool 或 expected_answer」
+    starter: |
+      def grade_case(case: dict[str, str], result: dict[str, str]) -> dict[str, bool]:
+          """对照工具和答案。缺字段时抛出 ValueError。"""
+          raise NotImplementedError
+    hint: 先检查样本的两个期待字段，再检查结果的 tool 和 final。缺了就抛出对应的 ValueError。然后分别比较，passed 用两个布尔值的与。
+    solution: |
+      def grade_case(case: dict[str, str], result: dict[str, str]) -> dict[str, bool]:
+          if "expected_tool" not in case or "expected_answer" not in case:
+              raise ValueError("样本缺少 expected_tool 或 expected_answer")
+          if "tool" not in result or "final" not in result:
+              raise ValueError("结果缺少 tool 或 final")
+          tool_ok = result["tool"] == case["expected_tool"]
+          answer_ok = result["final"] == case["expected_answer"]
+          return {"tool_ok": tool_ok, "answer_ok": answer_ok, "passed": tool_ok and answer_ok}
+    run: 本地用一份字段齐全且完全一致的样本调用，三个布尔值都应为真。只改错工具名时 passed 应为假且 answer_ok 仍为真。删掉 expected_tool 时应抛出 ValueError。页面不会执行这段代码。

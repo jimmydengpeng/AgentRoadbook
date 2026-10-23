@@ -1,0 +1,46 @@
+topicId: skills
+questions:
+  - id: skills-choice-1
+    topicId: skills
+    type: choice
+    difficulty: intermediate
+    prompt: 技能列表里已有同名指令，needed 为假。load_instructions 应怎样结束？
+    options:
+      - id: a
+        text: 返回 instructions 正文
+      - id: b
+        text: 抛出 ValueError，文本为任务用不上这份技能
+      - id: c
+        text: 加载另一个模型来执行这份技能
+      - id: d
+        text: 按指令立刻执行其中点名的工具
+    answer: b
+    explanation: 用不上时函数在读取正文之前抛出 ValueError。技能包里的文本不会因此进入这次上下文，也不会触发工具。
+  - id: skills-choice-2
+    topicId: skills
+    type: choice
+    difficulty: intermediate
+    prompt: catalog 返回的每一项包含哪些字段？
+    options:
+      - id: a
+        text: 只有 instructions
+      - id: b
+        text: 只有 name 和 description
+      - id: c
+        text: name、description 和已经执行的工具观察
+      - id: d
+        text: 新模型的权重路径
+    answer: b
+    explanation: catalog 只复制名称和描述，供宿主判断用不用得上。指令正文要等 load_instructions 在 needed 为真时才返回。
+  - id: skills-short-1
+    topicId: skills
+    type: short
+    difficulty: intermediate
+    prompt: 技能包、一次工具调用和模型分别是什么？needed 为真但名字不存在时，调用方看到什么？
+    note: 按本页的 Skill 字典写。不要引用 token 数量。
+    reference: 技能包是名称、描述和可复用的指令，读到它不会得到新的模型权重。一次工具调用是宿主另行决定的函数请求。needed 为真但名字对不上时，load_instructions 抛出 ValueError，文本是目录里没有这份技能，不返回指令。
+    rubric:
+      - 技能包是可复用的指令而不是新模型
+      - 工具调用仍由宿主决定
+      - 名字不存在时抛出 ValueError
+      - 没有引用 token 数量

@@ -1,0 +1,46 @@
+topicId: multi-agent-orchestration
+questions:
+  - id: multi-agent-orchestration-choice-1
+    topicId: multi-agent-orchestration
+    type: choice
+    difficulty: advanced
+    prompt: kind 为 peer，allowed 里没有 notes。handoff 应怎样结束？
+    options:
+      - id: a
+        text: 返回 notes
+      - id: b
+        text: 抛出 ValueError，文本为对等交接的目标不在允许集合
+      - id: c
+        text: 改走流水线并返回成稿
+      - id: d
+        text: 把 payload 返回给用户，当作任务已经完成
+    answer: b
+    explanation: 对等交接要先核对允许集合。目标不在集合里时函数抛出 ValueError，不会返回角色名，也不会把产出当成成稿。
+  - id: multi-agent-orchestration-choice-2
+    topicId: multi-agent-orchestration
+    type: choice
+    difficulty: advanced
+    prompt: kind 为 pipeline，payload 为「提纲」，allowed 为空。handoff 的返回值是什么？
+    options:
+      - id: a
+        text: 抛出 ValueError，因为名单是空的
+      - id: b
+        text: 成稿：提纲
+      - id: c
+        text: notes
+      - id: d
+        text: notes:提纲
+    answer: b
+    explanation: 流水线的下一站写在代码里，不检查 allowed。payload 为提纲时，返回值是成稿加上这段提纲。
+  - id: multi-agent-orchestration-short-1
+    topicId: multi-agent-orchestration
+    type: short
+    difficulty: advanced
+    prompt: 固定流水线、主管分发和对等交接分别把什么交出去？主管和对等失败时应用检查的是什么？
+    note: 按 handoff 的三种 kind 写。不需要给三种形状排名。
+    reference: 流水线返回按固定格式接好的下一步文本，不查名单。主管在 notes 位于允许集合时返回 notes 加产出，否则抛出找不到执行者。对等交接在目标位于允许集合时只返回下一角色的名字 notes，否则抛出目标不在允许集合。角色名不是已经完成的成稿。
+    rubric:
+      - 流水线返回固定的下一步文本且不查名单
+      - 主管核对执行者并发出带产出的分发
+      - 对等交接返回的是下一角色而不是成稿
+      - 没有给三种形状排名

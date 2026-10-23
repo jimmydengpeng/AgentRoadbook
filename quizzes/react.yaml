@@ -1,0 +1,30 @@
+topicId: react
+questions:
+  - id: react-choice-1
+    topicId: react
+    type: choice
+    difficulty: intermediate
+    prompt: 按本站对 ReAct 的说法，思考和行动在轨迹里怎样配合？
+    options:
+      - id: a
+        text: 先把全部思考写完，再一次性执行所有工具
+      - id: b
+        text: 思考写入轨迹；需要外部信息时提出行动，应用执行后把观察交回，再进入下一步
+      - id: c
+        text: 只保留工具调用，思考不能进入状态
+      - id: d
+        text: 应用把思考文本当作函数执行，所以思考会直接产生观察
+    answer: b
+    explanation: ReAct 让思考和行动交替出现在同一条轨迹里。思考不改变外部系统，也不产生观察。行动才由应用执行，观察写回后，下一步才能读到它。
+  - id: react-short-1
+    topicId: react
+    type: short
+    difficulty: intermediate
+    prompt: 普通工具循环和 ReAct 共用哪一套责任？ReAct 多写进状态的是什么？
+    note: 用自己的话写。不需要引用论文中的实验数字。
+    reference: 两者都是模型提出动作、应用执行、观察交回，直到应用掌握的停止条件。模型不执行函数。ReAct 多出来的是一步可见的思考，并把它留在轨迹里，供下一步决策读取。思考不是观察，也不能代替工具执行。论文只用来对照这个交替思路的来源。
+    rubric:
+      - 指出共用行动、观察和停止这套循环
+      - 说明应用执行工具，模型不执行函数
+      - 说明 ReAct 把思考写入轨迹
+      - 思考不能代替工具执行，且没有引用实验分数

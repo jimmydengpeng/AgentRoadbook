@@ -11,104 +11,28 @@ import type { ContentStatus } from '@content/schema'
 
 import { href } from '../href'
 
-type CoverageLink = {
-  id: string
-  title: string
-  link: string
-}
-
-type ModuleCoverage = {
-  id: string
-  title: string
-  order: number
-  published: number
-  total: number
-  fill: string
-  readable: CoverageLink[]
-}
-
-type ContentCoverage = {
-  published: number
-  planned: number
-  draft: number
-  reviewed: number
-  total: number
-  fill: string
-  summary: string
-  modules: ModuleCoverage[]
-}
-
 const heroImage = withBase('/hero-path.jpg')
 const orderedModules = computed(() => [...modules].sort((left, right) => left.order - right.order))
 const publishedCount = computed(() => topics.filter((topic) => topic.status === 'published').length)
 const featuredProjects = computed(() => [...projects].sort((left, right) => left.order - right.order))
-const coverage = computed(() => buildCoverage())
 
 function firstTopicLink(moduleId: string): string {
   const topic = topics.find((item) => item.module === moduleId)
   return href(topic?.link ?? '/')
 }
 
+function isWritten(status: ContentStatus): boolean {
+  return status !== 'planned'
+}
+
 function moduleCount(moduleId: string): string {
   const items = topics.filter((topic) => topic.module === moduleId)
-  const published = items.filter((topic) => topic.status === 'published').length
-  return `${published} 节已发布 / ${items.length} 节`
+  const written = items.filter((topic) => isWritten(topic.status)).length
+  return `${written} 节已有正文 / ${items.length} 节`
 }
 
 function indexLabel(order: number): string {
   return String(order - 1).padStart(2, '0')
-}
-
-function countStatus(status: ContentStatus): number {
-  return topics.filter((topic) => topic.status === status).length
-}
-
-function fillWidth(published: number, total: number): string {
-  if (total === 0) return '0%'
-  return `${(published / total) * 100}%`
-}
-
-function coverageSummary(published: number, reviewed: number, draft: number, planned: number, total: number): string {
-  const parts = [`已发布 ${published} 节`]
-  if (reviewed > 0) parts.push(`已审核 ${reviewed} 节`)
-  if (draft > 0) parts.push(`初稿 ${draft} 节`)
-  if (planned > 0) parts.push(`待编写 ${planned} 节`)
-  return `${parts.join('，')}，共 ${total} 节。`
-}
-
-function buildCoverage(): ContentCoverage {
-  const published = countStatus('published')
-  const reviewed = countStatus('reviewed')
-  const draft = countStatus('draft')
-  const planned = countStatus('planned')
-  const moduleRows = orderedModules.value.map((moduleInfo): ModuleCoverage => {
-    const items = topics
-      .filter((topic) => topic.module === moduleInfo.id)
-      .sort((left, right) => left.order - right.order)
-    const readable = items
-      .filter((topic) => topic.status === 'published')
-      .map((topic) => ({ id: topic.id, title: topic.title, link: href(topic.link) }))
-    const publishedInModule = readable.length
-    return {
-      id: moduleInfo.id,
-      title: moduleInfo.title,
-      order: moduleInfo.order,
-      published: publishedInModule,
-      total: items.length,
-      fill: fillWidth(publishedInModule, items.length),
-      readable
-    }
-  })
-  return {
-    published,
-    planned,
-    draft,
-    reviewed,
-    total: topics.length,
-    fill: fillWidth(published, topics.length),
-    summary: coverageSummary(published, reviewed, draft, planned, topics.length),
-    modules: moduleRows
-  }
 }
 </script>
 
@@ -185,47 +109,5 @@ function buildCoverage(): ContentCoverage {
         <p v-else>部署时设置 <code>VITE_GITHUB_REPOSITORY</code> 后，顶部导航会显示 GitHub 链接。</p>
       </section>
     </div>
-
-    <section class="home-section home-appendix" aria-labelledby="coverage-title">
-      <h2 id="coverage-title">内容完整度</h2>
-      <p>按模块看正文写到哪了。这不是你的学习进度。已发布的节可以直接打开，其余还在目录里。</p>
-      <p class="meta coverage-summary">{{ coverage.summary }}</p>
-      <div
-        class="meter"
-        role="meter"
-        :aria-valuenow="coverage.published"
-        aria-valuemin="0"
-        :aria-valuemax="coverage.total"
-        :aria-valuetext="coverage.summary"
-        aria-label="全站正文完成度"
-      >
-        <span :style="{ width: coverage.fill }"></span>
-      </div>
-      <ol class="coverage">
-        <li v-for="moduleInfo in coverage.modules" :key="moduleInfo.id">
-          <span class="road-index">{{ indexLabel(moduleInfo.order) }}</span>
-          <div class="coverage-body">
-            <div class="coverage-head">
-              <a :href="firstTopicLink(moduleInfo.id)">{{ moduleInfo.title }}</a>
-              <span class="coverage-count">{{ moduleInfo.published }} / {{ moduleInfo.total }}</span>
-            </div>
-            <div
-              class="meter"
-              role="meter"
-              :aria-valuenow="moduleInfo.published"
-              aria-valuemin="0"
-              :aria-valuemax="moduleInfo.total"
-              :aria-valuetext="`${moduleInfo.published} / ${moduleInfo.total}`"
-              :aria-label="`${moduleInfo.title} 已发布`"
-            >
-              <span :style="{ width: moduleInfo.fill }"></span>
-            </div>
-            <p v-if="moduleInfo.readable.length > 0" class="coverage-links">
-              <a v-for="topic in moduleInfo.readable" :key="topic.id" :href="topic.link">{{ topic.title }}</a>
-            </p>
-          </div>
-        </li>
-      </ol>
-    </section>
   </div>
 </template>

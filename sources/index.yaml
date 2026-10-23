@@ -17,6 +17,7 @@ sources:
     topics:
       - guide-environment
       - python-basics
+      - python-oop
     verification: verified
     license: Python 文档使用说明以官网为准
     publish: true
@@ -95,10 +96,11 @@ sources:
     type: official-doc
     topics:
       - agent-tool-calling
+      - structured-output
     verification: verified
     license: OpenAI 文档条款
     publish: true
-    notes: 工具调用消息结构的一个常见实现说明。
+    notes: 工具调用消息结构的一个常见实现说明。结构化输出页用它对照「行动请求」和「交付数据」。
   - id: openai-structured-outputs
     title: OpenAI Structured Outputs
     url: https://platform.openai.com/docs/guides/structured-outputs
@@ -106,10 +108,11 @@ sources:
     type: official-doc
     topics:
       - structured-output
+      - prompt-engineering
     verification: verified
     license: OpenAI 文档条款
     publish: true
-    notes: 结构化输出的官方说明。
+    notes: 结构化输出的官方说明。提示词页用它说明格式约束不能代替业务检查。
   - id: anthropic-tool-use
     title: Anthropic Tool use
     url: https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/overview
@@ -128,6 +131,7 @@ sources:
     type: official-doc
     topics:
       - mcp
+      - framework-choice
     verification: verified
     license: 以协议站点为准
     publish: true
@@ -139,6 +143,7 @@ sources:
     type: official-doc
     topics:
       - langchain
+      - framework-choice
     verification: verified
     license: 以项目文档许可为准
     publish: true
@@ -150,6 +155,7 @@ sources:
     type: official-doc
     topics:
       - langgraph
+      - framework-choice
     verification: verified
     license: 以项目文档许可为准
     publish: true
@@ -161,10 +167,14 @@ sources:
     type: paper
     topics:
       - rag-basics
+      - embedding
+      - chunking
+      - vector-database
+      - vector-search
     verification: verified
     license: arXiv 论文，引用时保留出处
     publish: true
-    notes: RAG 这一名称的来源论文。站点只引用结论方向，不复制论文正文。
+    notes: RAG 这一名称的来源论文。站点只引用先检索再生成的结构，不复制论文正文，也不摘实验分数。
   - id: react-paper
     title: "ReAct: Synergizing Reasoning and Acting in Language Models"
     url: https://arxiv.org/abs/2210.03629
@@ -176,3 +186,557 @@ sources:
     license: arXiv 论文，引用时保留出处
     publish: true
     notes: ReAct 论文。站点只说明它要交替推理和行动，不复制实验数据。
+  - id: python-classes
+    title: "Python 教程：Classes"
+    url: https://docs.python.org/3/tutorial/classes.html
+    author: Python Software Foundation
+    type: official-doc
+    topics:
+      - python-oop
+    verification: verified
+    license: Python 文档使用说明以官网为准
+    publish: true
+    notes: 面向对象页用来核对类、实例和属性。
+  - id: pydantic-models
+    title: Pydantic Models
+    url: https://docs.pydantic.dev/latest/concepts/models/
+    author: Pydantic
+    type: official-doc
+    topics:
+      - pydantic
+    verification: verified
+    license: 以项目文档许可为准
+    publish: true
+    notes: 数据校验页用来核对 model_validate 和 model_dump。
+  - id: openai-text-generation
+    title: OpenAI Text generation
+    url: https://platform.openai.com/docs/guides/text-generation
+    author: OpenAI
+    type: official-doc
+    topics:
+      - llm-basics
+      - prompt-engineering
+      - llm-api
+    verification: verified
+    license: OpenAI 文档条款
+    publish: true
+    notes: 文本生成和消息角色的官方说明。
+  - id: openai-chat-api
+    title: OpenAI Chat API
+    url: https://platform.openai.com/docs/api-reference/chat
+    author: OpenAI
+    type: official-doc
+    topics:
+      - llm-api
+      - streaming
+    verification: verified
+    license: OpenAI 文档条款
+    publish: true
+    notes: 聊天补全接口的字段说明。
+  - id: openai-responses-create
+    title: OpenAI Responses 创建接口
+    url: https://platform.openai.com/docs/api-reference/responses/create
+    author: OpenAI
+    type: official-doc
+    topics:
+      - token-context
+    verification: verified
+    license: OpenAI 文档条款
+    publish: true
+    notes: 用来核对超长输入时的截断行为，不引用价格。
+  - id: anthropic-context-windows
+    title: Anthropic Context windows
+    url: https://docs.anthropic.com/en/docs/build-with-claude/context-windows
+    author: Anthropic
+    type: official-doc
+    topics:
+      - token-context
+    verification: verified
+    license: Anthropic 文档条款
+    publish: true
+    notes: 另一家服务商对上下文窗口组成的说明。
+  - id: openai-streaming
+    title: OpenAI Streaming
+    url: https://platform.openai.com/docs/guides/streaming
+    author: OpenAI
+    type: official-doc
+    topics:
+      - streaming
+    verification: verified
+    license: OpenAI 文档条款
+    publish: true
+    notes: 流式响应如何分成增量文本。
+  - id: python-os
+    title: Python os
+    url: https://docs.python.org/3/library/os.html
+    author: Python Software Foundation
+    type: official-doc
+    topics:
+      - llm-api
+    verification: verified
+    license: Python 文档使用说明以官网为准
+    publish: true
+    notes: 从环境变量读取密钥时对照 os.environ。
+  - id: openai-embeddings
+    title: OpenAI Vector embeddings
+    url: https://platform.openai.com/docs/guides/embeddings
+    author: OpenAI
+    type: official-doc
+    topics:
+      - embedding
+    verification: verified
+    license: OpenAI 文档条款
+    publish: true
+    notes: 嵌入是浮点向量、距离表示相关程度。不引用价格或延迟。
+  - id: huggingface-agents-course
+    title: Hugging Face Agents Course
+    url: https://huggingface.co/learn/agents-course
+    author: Hugging Face
+    type: repository
+    topics:
+      - guide-learning-path
+    verification: verified
+    license: 课程仓库为 Apache-2.0，页面素材以课程站点为准
+    publish: true
+    notes: 公开课程入口。资源页只放链接，不转载课程正文。
+  - id: microsoft-agents-beginners
+    title: AI Agents for Beginners
+    url: https://github.com/microsoft/ai-agents-for-beginners
+    author: Microsoft
+    type: repository
+    topics:
+      - guide-learning-path
+    verification: verified
+    license: 仓库许可证以 GitHub 上的文件为准
+    publish: true
+    notes: 入门课程仓库。资源页只放链接。
+  - id: llm-universe
+    title: LLM Universe
+    url: https://datawhalechina.github.io/llm-universe/
+    author: Datawhale
+    type: repository
+    topics:
+      - guide-learning-path
+    verification: verified
+    license: 以仓库许可证为准
+    publish: true
+    notes: 中文大模型应用入门教程的在线入口。
+  - id: langchain-academy
+    title: LangChain Academy
+    url: https://github.com/langchain-ai/langchain-academy
+    author: LangChain
+    type: repository
+    topics:
+      - langgraph
+    verification: verified
+    license: 以仓库许可证为准
+    publish: true
+    notes: LangGraph 笔记本课程。资源页只放链接。
+  - id: rag-from-scratch
+    title: RAG From Scratch
+    url: https://github.com/langchain-ai/rag-from-scratch
+    author: LangChain
+    type: repository
+    topics:
+      - rag-basics
+    verification: verified
+    license: 以仓库许可证为准
+    publish: true
+    notes: 把检索拆成小步骤的笔记本集合。资源页只放链接，不把其中代码当成唯一实现。
+  - id: anthropic-building-effective-agents
+    title: Building effective agents
+    url: https://www.anthropic.com/engineering/building-effective-agents
+    author: Anthropic
+    type: official-doc
+    topics:
+      - planning
+      - multi-agent
+      - multi-agent-orchestration
+      - framework-choice
+    verification: verified
+    license: Anthropic 工程文章，引用时保留出处
+    publish: true
+    notes: 用来对照把任务拆成可检查的步骤，以及由一个角色分派子任务。不摘费用或延迟。
+  - id: langgraph-workflows-agents
+    title: LangGraph Workflows and agents
+    url: https://docs.langchain.com/oss/python/langgraph/workflows-agents
+    author: LangChain
+    type: official-doc
+    topics:
+      - planning
+      - multi-agent-orchestration
+    verification: verified
+    license: 以项目文档许可为准
+    publish: true
+    notes: 工作流按既定路径运行，智能体则自己决定过程和工具。不复制页面中的模型调用代码。
+  - id: langgraph-graph-api
+    title: LangGraph Graph API
+    url: https://docs.langchain.com/oss/python/langgraph/graph-api
+    author: LangChain
+    type: official-doc
+    topics:
+      - agent-state
+      - langgraph
+    verification: verified
+    license: 以项目文档许可为准
+    publish: true
+    notes: 状态是应用当前快照，节点函数返回更新。不复制图算法细节。
+  - id: langgraph-checkpointers
+    title: LangGraph Checkpointers
+    url: https://docs.langchain.com/oss/python/langgraph/checkpointers
+    author: LangChain
+    type: official-doc
+    topics:
+      - agent-state
+    verification: verified
+    license: 以项目文档许可为准
+    publish: true
+    notes: 检查点按步骤保存轨迹。用来说明轨迹属于应用，不是模型参数。
+  - id: openai-agents-python-handoffs
+    title: OpenAI Agents SDK Handoffs
+    url: https://openai.github.io/openai-agents-python/handoffs/
+    author: OpenAI
+    type: official-doc
+    topics:
+      - multi-agent
+      - multi-agent-orchestration
+    verification: verified
+    license: OpenAI 文档条款
+    publish: true
+    notes: 交接由运行器转给下一角色。用来说明转交发生在应用一侧。
+  - id: weaviate-hybrid-search
+    title: Hybrid search
+    url: https://docs.weaviate.io/weaviate/search/hybrid
+    author: Weaviate
+    type: official-doc
+    topics:
+      - hybrid-search
+    verification: verified
+    license: 以项目文档许可为准
+    publish: true
+    notes: 混合检索把向量结果和关键词结果融合。不采用页面里的示例权重。
+  - id: dpr-paper
+    title: Dense Passage Retrieval for Open-Domain Question Answering
+    url: https://arxiv.org/abs/2004.04906
+    author: Vladimir Karpukhin 等
+    topics:
+      - hybrid-search
+      - rag-evaluation
+    type: paper
+    verification: verified
+    license: arXiv 论文，引用时保留出处
+    publish: true
+    notes: 关键词和稠密向量可以互补。检索评测看取回片段是否含有答案。不引用实验准确率。
+  - id: bert-passage-rerank
+    title: Passage Re-ranking with BERT
+    url: https://arxiv.org/abs/1901.04085
+    author: Rodrigo Nogueira 等
+    type: paper
+    topics:
+      - rerank
+    verification: verified
+    license: arXiv 论文，引用时保留出处
+    publish: true
+    notes: 重排是召回之后的第二阶段。不引用实验分数，也不把论文里的候选规模当成默认值。
+  - id: cohere-rerank
+    title: Cohere Rerank
+    url: https://docs.cohere.com/docs/reranking
+    author: Cohere
+    type: official-doc
+    topics:
+      - rerank
+    verification: verified
+    license: Cohere 文档条款
+    publish: true
+    notes: 重排接收一条查询和一份文档列表并重新排序。不引用示例分数，也不调用接口。
+  - id: rewrite-retrieve-read
+    title: Query Rewriting for Retrieval-Augmented Large Language Models
+    url: https://arxiv.org/abs/2305.14283
+    author: Xinbei Ma 等
+    type: paper
+    topics:
+      - query-rewrite
+    verification: verified
+    license: arXiv 论文，引用时保留出处
+    publish: true
+    notes: 在检索前改写查询。不引用实验分数。
+  - id: self-rag-paper
+    title: "Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection"
+    url: https://arxiv.org/abs/2310.11511
+    author: Akari Asai 等
+    type: paper
+    topics:
+      - agentic-rag
+    verification: verified
+    license: arXiv 论文，引用时保留出处
+    publish: true
+    notes: 模型决定要不要检索，需要时再调用检索器。不引用实验分数。
+  - id: openai-conversation-state
+    title: OpenAI Conversation state
+    url: https://platform.openai.com/docs/guides/conversation-state
+    author: OpenAI
+    type: official-doc
+    topics:
+      - conversation-history
+    verification: verified
+    license: OpenAI 文档条款
+    publish: true
+    notes: 一次请求本身不保留上一轮。多轮对话要把已有消息放进这一次请求。不引用窗口长度或价格。
+  - id: langgraph-persistence
+    title: LangGraph Persistence
+    url: https://docs.langchain.com/oss/python/langgraph/persistence
+    author: LangChain
+    type: official-doc
+    topics:
+      - short-term-memory
+      - memory-storage
+    verification: verified
+    license: 以项目文档许可为准
+    publish: true
+    notes: 检查点保存单条线程上的状态。不引用延迟或费用。
+  - id: langgraph-stores
+    title: LangGraph Stores
+    url: https://docs.langchain.com/oss/python/langgraph/stores
+    author: LangChain
+    type: official-doc
+    topics:
+      - long-term-memory
+      - memory-storage
+      - memory-update
+    verification: verified
+    license: 以项目文档许可为准
+    publish: true
+    notes: 跨线程记录放在命名空间里。同一键再次写入会覆盖原记录。不把默认条数写成读者配置。
+  - id: anthropic-context-engineering
+    title: Effective context engineering for AI agents
+    url: https://www.anthropic.com/research/effective-context-engineering-for-ai-agents
+    author: Anthropic
+    type: official-doc
+    topics:
+      - context-engineering
+      - context-compression
+    verification: verified
+    license: Anthropic 站点条款
+    publish: true
+    notes: 上下文工程是每次推理时挑选要送进模型的内容。不摘录文中的步数或长度数字。
+  - id: anthropic-memory-tool
+    title: Anthropic Memory tool
+    url: https://docs.anthropic.com/en/docs/agents-and-tools/tool-use/memory-tool
+    author: Anthropic
+    type: official-doc
+    topics:
+      - long-term-memory
+      - memory-update
+    verification: verified
+    license: Anthropic 文档条款
+    publish: true
+    notes: 记忆的读取和改写由应用在自己的存储上执行。不复制工具命令。
+  - id: anthropic-context-editing
+    title: Anthropic Context editing
+    url: https://docs.anthropic.com/en/docs/build-with-claude/context-editing
+    author: Anthropic
+    type: official-doc
+    topics:
+      - context-compression
+    verification: verified
+    license: Anthropic 文档条款
+    publish: true
+    notes: 压缩会用摘要换掉较早的内容。不引用阈值或价格。
+  - id: fastapi-settings
+    title: FastAPI Settings
+    url: https://fastapi.tiangolo.com/advanced/settings/
+    author: FastAPI
+    type: official-doc
+    topics:
+      - fastapi-service
+    verification: verified
+    license: 以项目文档许可为准
+    publish: true
+    notes: 服务配置从环境读入。用来说明配置和源码分开。
+  - id: fastapi-handling-errors
+    title: FastAPI 错误处理
+    url: https://fastapi.tiangolo.com/tutorial/handling-errors/
+    author: FastAPI
+    type: official-doc
+    topics:
+      - fastapi-service
+    verification: verified
+    license: 以项目文档许可为准
+    publish: true
+    notes: 校验失败时客户端看到错误响应。
+  - id: html-server-sent-events
+    title: HTML 服务器发送事件
+    url: https://html.spec.whatwg.org/multipage/server-sent-events.html
+    author: WHATWG
+    type: official-doc
+    topics:
+      - streaming-sse
+    verification: verified
+    license: 以 WHATWG 规范页面的许可为准
+    publish: true
+    notes: 事件字段之间用空行分隔。只用这个文本格式。
+  - id: fastapi-responses
+    title: FastAPI Responses
+    url: https://fastapi.tiangolo.com/reference/responses/
+    author: FastAPI
+    type: official-doc
+    topics:
+      - streaming-sse
+    verification: verified
+    license: 以项目文档许可为准
+    publish: true
+    notes: StreamingResponse 用来把事件文本持续写给客户端。
+  - id: python-sqlite3
+    title: sqlite3
+    url: https://docs.python.org/3/library/sqlite3.html
+    author: Python Software Foundation
+    type: official-doc
+    topics:
+      - database-storage
+    verification: verified
+    license: Python 文档使用说明以官网为准
+    publish: true
+    notes: 标准库里的本地数据库。存储页不连接网络数据库。
+  - id: python-logging
+    title: logging
+    url: https://docs.python.org/3/library/logging.html
+    author: Python Software Foundation
+    type: official-doc
+    topics:
+      - agent-observability
+    verification: verified
+    license: Python 文档使用说明以官网为准
+    publish: true
+    notes: 标准库日志。写入前先遮住密钥。
+  - id: otel-traces
+    title: OpenTelemetry Traces
+    url: https://opentelemetry.io/docs/concepts/signals/traces/
+    author: OpenTelemetry
+    type: official-doc
+    topics:
+      - agent-observability
+    verification: verified
+    license: 以项目文档许可为准
+    publish: true
+    notes: 用一条 trace 上的 span 表示同一次任务中的多个步骤。不引用延迟数字。
+  - id: docker-dockerfile
+    title: Dockerfile 参考
+    url: https://docs.docker.com/reference/dockerfile/
+    author: Docker
+    type: official-doc
+    topics:
+      - docker-deploy
+    verification: verified
+    license: 以 Docker 文档许可为准
+    publish: true
+    notes: 镜像指令参考。部署页不用它写成可直接发布的脚本。
+  - id: docker-build-secrets
+    title: Docker Build secrets
+    url: https://docs.docker.com/build/building/secrets/
+    author: Docker
+    type: official-doc
+    topics:
+      - docker-deploy
+    verification: verified
+    license: 以 Docker 文档许可为准
+    publish: true
+    notes: 构建过程中的凭证处理和写进镜像的环境变量不是一回事。
+  - id: python-subprocess
+    title: subprocess
+    url: https://docs.python.org/3/library/subprocess.html
+    author: Python Software Foundation
+    type: official-doc
+    topics:
+      - agent-security
+    verification: verified
+    license: Python 文档使用说明以官网为准
+    publish: true
+    notes: 说明参数列表和经过 shell 的差别。安全页优先调用本地函数。
+  - id: owasp-secrets-management
+    title: OWASP Secrets Management Cheat Sheet
+    url: https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html
+    author: OWASP
+    type: official-doc
+    topics:
+      - agent-security
+    verification: verified
+    license: 以 OWASP Cheat Sheet 页面的许可为准
+    publish: true
+    notes: 只取密钥不进仓库、不进日志。不复制条目正文。
+  - id: owasp-command-injection-defense
+    title: OWASP OS Command Injection Defense Cheat Sheet
+    url: https://cheatsheetseries.owasp.org/cheatsheets/OS_Command_Injection_Defense_Cheat_Sheet.html
+    author: OWASP
+    type: official-doc
+    topics:
+      - agent-security
+    verification: verified
+    license: 以 OWASP Cheat Sheet 页面的许可为准
+    publish: true
+    notes: 只讲不要把输入拼进系统命令。不提供可执行的攻击步骤。
+  - id: python-unittest
+    title: unittest
+    url: https://docs.python.org/3/library/unittest.html
+    author: Python Software Foundation
+    type: official-doc
+    topics:
+      - agent-testing
+    verification: verified
+    license: Python 文档使用说明以官网为准
+    publish: true
+    notes: 用断言检查返回值和应当抛出的异常。测试页的例子不发起网络请求。
+  - id: swe-bench
+    title: "SWE-bench: Can Language Models Resolve Real-World GitHub Issues?"
+    url: https://arxiv.org/abs/2310.06770
+    author: Carlos E. Jimenez 等
+    type: paper
+    topics:
+      - agent-evaluation
+    verification: verified
+    license: arXiv 论文，引用时保留出处
+    publish: true
+    notes: 论文把软件工程任务和是否通过检查分开。不引用实验分数，也不复制题目。
+  - id: openai-evals
+    title: OpenAI Evals
+    url: https://github.com/openai/evals
+    author: OpenAI
+    type: repository
+    topics:
+      - agent-evaluation
+    verification: verified
+    license: 以仓库许可证为准
+    publish: true
+    notes: 公开仓库把题目和评分放在一起。评估页只放链接，不转载其中的题目或代码。
+  - id: twelve-factor-config
+    title: "The Twelve-Factor App: Config"
+    url: https://12factor.net/config
+    author: Adam Wiggins
+    type: official-doc
+    topics:
+      - production-practice
+    verification: verified
+    license: 以 12factor.net 页面说明为准
+    publish: true
+    notes: 配置放在环境里，不写进代码。不描述某次部署。
+  - id: mcp-architecture
+    title: MCP 架构概览
+    url: https://modelcontextprotocol.io/docs/learn/architecture
+    author: MCP
+    type: official-doc
+    topics:
+      - mcp
+    verification: verified
+    license: 以协议站点为准
+    publish: true
+    notes: 宿主协调客户端，服务器提供工具。协议不规定应用怎样使用模型。
+  - id: anthropic-agent-skills
+    title: Agent Skills 概览
+    url: https://docs.anthropic.com/en/docs/agents-and-tools/agent-skills/overview
+    author: Anthropic
+    type: official-doc
+    topics:
+      - skills
+    verification: verified
+    license: Anthropic 文档条款
+    publish: true
+    notes: 技能是可复用资源。不复制产品教程，也不引用 token 数量。

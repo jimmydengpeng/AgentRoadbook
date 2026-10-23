@@ -1,0 +1,29 @@
+topicId: vector-database
+questions:
+  - id: vector-database-choice-1
+    topicId: vector-database
+    type: choice
+    difficulty: beginner
+    prompt: 向量库里的一条记录，除了向量，至少还要留下什么？
+    options:
+      - id: a
+        text: 只留向量即可，原文可以由模型重新生成
+      - id: b
+        text: 原文，以及能回到那一段的来源
+      - id: c
+        text: 必须同时部署某一个指定的外部向量数据库
+      - id: d
+        text: 嵌入服务的密钥
+    answer: b
+    explanation: 比较只用向量。交给模型和供人核对时需要原文，回到文件里的那一段需要来源。内存列表就能保存这些字段。外部服务是同一种记录的另一种存放方式。
+  - id: vector-database-short-1
+    topicId: vector-database
+    type: short
+    difficulty: beginner
+    prompt: 说明为什么学习这条流水线时可以先用内存里的列表，以及每条记录要有哪些字段。
+    reference: 列表就能保存向量、原文和来源，并在之后把原文取回来。来源要具体到文件和其中的位置，例如文件名加段号。外部服务换成的是存放和查找方式，取回的仍然是这些字段。只有向量时，无法向用户展示依据。空原文、空来源和零向量应当在写入时拒绝。
+    rubric:
+      - 提到向量、原文和来源都要保存
+      - 说明内存列表可以完成保存和取回
+      - 说明某一个外部服务不是必须
+      - 说明来源要能区分是哪一段

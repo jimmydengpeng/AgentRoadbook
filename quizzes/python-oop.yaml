@@ -1,0 +1,29 @@
+topicId: python-oop
+questions:
+  - id: python-oop-choice-1
+    topicId: python-oop
+    type: choice
+    difficulty: beginner
+    prompt: 工具注册表里的字典应该放在哪里？
+    options:
+      - id: a
+        text: 作为类属性，让这个类的全部实例共用一份
+      - id: b
+        text: 作为实例属性，每次构造时新建一份
+      - id: c
+        text: 写进方法的可变默认参数
+      - id: d
+        text: 放进模块级字符串，用下标表示工具名
+    answer: b
+    explanation: 登记表是这一份注册表自己的状态，应在实例上新建。类属性和可变默认参数会让不同任务改到同一份字典。字符串下标不能按名字安全地找出工具。
+  - id: python-oop-short-1
+    topicId: python-oop
+    type: short
+    difficulty: beginner
+    prompt: 注册表遇到没有登记的工具名时，为什么要抛出错误，而不是返回空字符串？
+    note: 提到调用方或模型如何理解这个结果。
+    reference: 空字符串和「工具成功但没有正文」无法区分。模型会把空文本当成一次有效观察。未知名字应抛出 KeyError 或其他写明名字的错误，循环才能把它写成失败说明，而不是继续当作结果使用。
+    rubric:
+      - 指出空字符串会被当成成功的观察结果
+      - 说明调用方或模型无法知道工具没有登记
+      - 提到应抛出可区分的异常

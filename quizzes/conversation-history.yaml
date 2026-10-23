@@ -1,0 +1,69 @@
+topicId: conversation-history
+questions:
+  - id: conversation-history-choice-1
+    topicId: conversation-history
+    type: choice
+    difficulty: beginner
+    prompt: 下一次请求要接上已经发生的对话。这些消息应该怎样放进这一次请求？
+    options:
+      - id: a
+        text: 只发送最后一条用户消息，模型会自动记得前面
+      - id: b
+        text: 按发生顺序放进这一次请求的消息列表，较早的在前
+      - id: c
+        text: 把工具结果放在提出调用的助手消息前面
+      - id: d
+        text: 把所有消息打乱后发送，顺序不影响阅读
+    answer: b
+    explanation: 一次文本生成请求不会自动带上上一轮没再发送的内容。延续对话时，用户、助手和工具消息按发生顺序进入这一次的列表。
+  - id: conversation-history-short-1
+    topicId: conversation-history
+    type: short
+    difficulty: beginner
+    prompt: 助手消息提出了工具调用。工具结果应该排在列表的哪里？如果结果只写在日志里、没有放进这次请求，模型这次能读到吗？
+    note: 按本页的消息顺序说明，不需要背某个厂商的字段名。
+    reference: 工具结果紧跟在提出这次调用的助手消息之后。只留在日志里、没有放进这次请求列表的结果，模型这一轮读不到。完整记录仍可以留在调用方的原列表里。
+    rubric:
+      - 工具结果排在对应助手消息之后
+      - 没放进这次请求的结果，模型读不到
+      - 没有把工具结果排到助手消息前面
+  - id: conversation-history-code-1
+    topicId: conversation-history
+    type: code
+    difficulty: beginner
+    prompt: 实现 trim_history。开头若是 system 则保留。再保留最后 keep 条其余消息，顺序不变。keep 为 0 时只返回开头的 system 或空列表。keep 为负时抛出 ValueError。返回新列表，不要修改传入的列表，也不要访问网络。
+    examples:
+      - input: "消息依次是 system「只回答日程」、user「周一」、assistant「记下周一」、user「改到周三」，keep 为 2"
+        output: "system「只回答日程」、assistant「记下周一」、user「改到周三」"
+      - input: "没有 system，消息依次是 user「周一」、assistant「记下周一」、user「改到周三」，keep 为 1"
+        output: "user「改到周三」"
+      - input: "消息依次是 system「只回答日程」、user「周一」，keep 为 0"
+        output: "只有 system「只回答日程」"
+      - input: "任意消息列表，keep 为 -1"
+        output: 抛出 ValueError
+    starter: |
+      def trim_history(messages: list[dict[str, str]], keep: int) -> list[dict[str, str]]:
+          """保留开头的 system，再保留最后 keep 条其余消息。
+
+          keep 为 0 时只返回开头的 system；没有 system 则返回空列表。
+          keep 为负时抛出 ValueError。
+          返回新列表，不修改传入的 messages。
+          """
+          raise NotImplementedError
+    hint: 先拒绝负数。若第一条的 role 是 system，把它和后面的消息分开。keep 为 0 时只返回头部。keep 不小于其余消息的条数时，返回头部加全部其余消息。否则返回头部加其余消息的最后 keep 条。用 list(...) 做出新列表。
+    solution: |
+      def trim_history(messages: list[dict[str, str]], keep: int) -> list[dict[str, str]]:
+          if keep < 0:
+              raise ValueError("keep 不能为负")
+          if messages and messages[0]["role"] == "system":
+              head = messages[:1]
+              body = messages[1:]
+          else:
+              head = []
+              body = messages
+          if keep == 0:
+              return list(head)
+          if keep >= len(body):
+              return list(head) + list(body)
+          return list(head) + list(body[-keep:])
+    run: 把函数保存到本地后检查四次。带 system 且 keep 为 2 时，返回指令和最后两条，原列表的更早消息不在返回值里。没有 system 且 keep 为 1 时，只返回最后一条。keep 为 0 时只留下开头的 system。keep 为 -1 时抛出 ValueError。页面不会执行这段代码。

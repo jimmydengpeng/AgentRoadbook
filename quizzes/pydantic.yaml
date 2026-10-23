@@ -1,0 +1,61 @@
+topicId: pydantic
+questions:
+  - id: pydantic-choice-1
+    topicId: pydantic
+    type: choice
+    difficulty: beginner
+    prompt: 把模型输出交给会写数据的工具之前，Pydantic 模型主要做什么？
+    options:
+      - id: a
+        text: 代替工具去连接数据库并完成写入
+      - id: b
+        text: 按字段声明检查这份数据能否成为合法实例
+      - id: c
+        text: 跳过校验，直接用 model_construct 接收外部文本
+      - id: d
+        text: 把 Python 源码作为对话发给模型服务
+    answer: b
+    explanation: 校验用来得到符合字段类型和约束的实例。做不到时抛出 ValidationError。它不执行工具的副作用。外部数据不应走会跳过校验的构造。
+  - id: pydantic-short-1
+    topicId: pydantic
+    type: short
+    difficulty: beginner
+    prompt: 工具参数校验失败时，为什么不能返回空字典让循环继续？
+    note: 说明模型和调用方会怎样理解空字典。
+    reference: 空字典看起来像一次成功且没有字段的结果。循环和模型都会以为参数有效并继续。校验失败应让 ValidationError 抛出，或包成写明哪一份数据失败的错误，并用 from 保留原始异常，在产生副作用之前停下。
+    rubric:
+      - 指出空字典会被当成成功结果
+      - 说明调用方或模型无法发现校验失败
+      - 提到应抛出错误并保留 ValidationError
+  - id: pydantic-code-1
+    topicId: pydantic
+    type: code
+    difficulty: beginner
+    prompt: 用 Pydantic 的 BaseModel 实现 require_city。字段 city 是必填 str。输入能通过 model_validate 时返回 city 字符串。缺少 city，或 city 的值无法按该模型解析时，让 ValidationError 继续抛出。
+    examples:
+      - input: '{"city": "杭州"}'
+        output: 杭州
+      - input: "{}"
+        output: 抛出 ValidationError
+      - input: '{"city": {"name": "杭州"}}'
+        output: 抛出 ValidationError
+    starter: |
+      from pydantic import BaseModel
+
+      class CityQuery(BaseModel):
+          city: str
+
+      def require_city(data: dict[str, object]) -> str:
+          """返回通过校验的 city。校验失败时不要吞掉 ValidationError。"""
+          raise NotImplementedError
+    hint: 调用 CityQuery.model_validate(data)，通过后返回 query.city。不要用 model_construct，也不要把 ValidationError 捕获后返回空字符串。
+    solution: |
+      from pydantic import BaseModel
+
+      class CityQuery(BaseModel):
+          city: str
+
+      def require_city(data: dict[str, object]) -> str:
+          query = CityQuery.model_validate(data)
+          return query.city
+    run: 页面不执行代码。在已安装 Pydantic 的环境里把函数保存到本地，用上面三组输入自行检查。成功的一组应返回杭州。后两组应看到 ValidationError，且函数没有返回空字符串。

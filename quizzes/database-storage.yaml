@@ -1,0 +1,64 @@
+topicId: database-storage
+questions:
+  - id: database-storage-choice-1
+    topicId: database-storage
+    type: choice
+    difficulty: intermediate
+    prompt: save_message 收到的 session_id 是空字符串。调用方接下来能看到什么？
+    options:
+      - id: a
+        text: 存储里多出一个空键，load 返回刚写的文本
+      - id: b
+        text: 抛出 ValueError，这次调用不会写入
+      - id: c
+        text: 返回空列表，表示会话存在但没有消息
+      - id: d
+        text: 删掉该存储里已有的全部会话
+    answer: b
+    explanation: 缺字段在写入前抛出 ValueError。存储保持原样，调用方不会把这次失败看成一条新消息或一个空会话。
+  - id: database-storage-short-1
+    topicId: database-storage
+    type: short
+    difficulty: intermediate
+    prompt: 同一份存储和一份新建的空存储，load 的结果有什么不同？为什么连接失败不能返回空列表？
+    note: 用本页的字典示例说明，不需要某个数据库产品的连接串。
+    reference: 同一份存储能按写入顺序读回该会话的文本。新建的空存储表示进程内存重新开始，load 得到空列表。空列表只表示查过而且没有行。缺字段和连接失败都要抛出异常，否则调用方会以为这个会话从来没有消息。
+    rubric:
+      - 同一存储可以读回已写入的文本
+      - 新的空存储读回空列表
+      - 空列表不表示出错
+      - 缺字段或连接失败时抛出异常
+  - id: database-storage-code-1
+    topicId: database-storage
+    type: code
+    difficulty: intermediate
+    prompt: 用字典实现 save_message 和 load_messages。session_id 或 text 为空时抛出 ValueError，并且不要写入。读取缺 session_id 时也抛出 ValueError。没有这个会话时返回空列表。不要访问网络。
+    examples:
+      - input: 在空字典写入 session s1、文本「你好」，再用同一字典读取 s1
+        output: '["你好"]'
+      - input: 对已有字典写入空的 session_id
+        output: 抛出 ValueError，字典内容不变
+      - input: 在字典 A 写入 s1 后，用一个新的空字典读取 s1
+        output: "[]"
+    starter: |
+      def save_message(store: dict[str, list[str]], session_id: str, text: str) -> None:
+          """把一条消息追加到会话。缺字段时抛出 ValueError。"""
+          raise NotImplementedError
+
+      def load_messages(store: dict[str, list[str]], session_id: str) -> list[str]:
+          """按写入顺序返回该会话的文本。没有行时返回空列表。"""
+          raise NotImplementedError
+    hint: 两个函数都先拒绝空的 session_id。save_message 还要拒绝空 text，通过之后再用 setdefault 追加。load_messages 对没有的键返回新的空列表，不要把缺字段收成空列表。
+    solution: |
+      def save_message(store: dict[str, list[str]], session_id: str, text: str) -> None:
+          if not session_id:
+              raise ValueError("缺少 session_id")
+          if not text:
+              raise ValueError("缺少 text")
+          store.setdefault(session_id, []).append(text)
+
+      def load_messages(store: dict[str, list[str]], session_id: str) -> list[str]:
+          if not session_id:
+              raise ValueError("缺少 session_id")
+          return list(store.get(session_id, []))
+    run: 在本地准备一个字典，写入后再用同一个字典读，应得到按顺序排列的文本。空 session_id 应抛出 ValueError，且原字典不变。换一个新字典去读同一个会话号，应得到空列表。页面不会执行这段代码。

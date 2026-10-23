@@ -1,0 +1,69 @@
+topicId: chunking
+questions:
+  - id: chunking-choice-1
+    topicId: chunking
+    type: choice
+    difficulty: beginner
+    prompt: 相邻块重叠一段，主要是为了什么？
+    options:
+      - id: a
+        text: 所有向量数据库都规定必须重叠，否则无法写入
+      - id: b
+        text: 切点两边的句子还能一起出现在某一块里
+      - id: c
+        text: 重叠可以把召回率固定提高一个确定的百分比
+      - id: d
+        text: 重叠越长越好，最好每次都重叠整篇文档
+    answer: b
+    explanation: 重叠是为了不让一句话正好被切点拆开。它不是某个数据库的写入条件，也没有一个对所有文档都成立的段数或召回率。窗口长到盖过全文时，整篇作为一块即可。
+  - id: chunking-short-1
+    topicId: chunking
+    type: short
+    difficulty: beginner
+    prompt: 为什么不能从教程里抄一个块长度用在所有文档上？你会怎样为自己的文档做决定？
+    reference: 块要能读完，又不要把无关段落绑在一起。常见起点是按段落切，并让相邻块重叠。具体重叠几段，要拿自己的文档切几块来读，看标题有没有离开正文、答案会不会落在切点上。教程里的字数只属于别人的文档。过短的页码或「见下表」可以先并进相邻段落，再切一次。
+    rubric:
+      - 说明长度取决于自己的文档
+      - 提到按段落切，并让相邻块重叠，是起点
+      - 提到要阅读切出来的样例，检查句子或标题
+      - 没有给出一个假装普适的字数或召回率
+  - id: chunking-code-1
+    topicId: chunking
+    type: code
+    difficulty: beginner
+    prompt: 实现 chunk_paragraphs。它按空行把文本分成段落，再用滑动窗口拼成块。先把回车换行和单独的回车规范成换行。每段去掉首尾空白，连续空行不产生空段。overlap_paragraphs 是相邻块共享的段落数，窗口长度是这个数加 1。它小于 0 时抛出 ValueError。文本去掉空白后没有段落时返回空列表。共享段数大于或等于段落数时，返回只含一整块的列表。块内段落用一个空行连接。
+    examples:
+      - input: 'chunk_paragraphs("甲\n\n乙\n\n丙", 1)'
+        output: '["甲\n\n乙", "乙\n\n丙"]'
+      - input: 'chunk_paragraphs("甲\n\n乙", 0)'
+        output: '["甲", "乙"]'
+      - input: 'chunk_paragraphs("只有一段", 2)'
+        output: '["只有一段"]'
+      - input: 'chunk_paragraphs("", 0)'
+        output: "[]"
+      - input: overlap_paragraphs 为 -1
+        output: 抛出 ValueError
+      - input: 'chunk_paragraphs("甲\r\n\r\n乙", 0)'
+        output: '["甲", "乙"]'
+    starter: |
+      def chunk_paragraphs(text: str, overlap_paragraphs: int) -> list[str]:
+          """按空行分段，相邻块共享 overlap_paragraphs 个段落。"""
+          raise NotImplementedError
+    hint: 先拒绝负数。把换行规范后按空行拆开，丢掉空白段。共享段数已经盖过全文时，把剩下的段落用空行接成一块。否则窗口长度是共享段数加 1，每次向前挪一段。
+    solution: |
+      def chunk_paragraphs(text: str, overlap_paragraphs: int) -> list[str]:
+          """按空行分段，相邻块共享 overlap_paragraphs 个段落。"""
+          if overlap_paragraphs < 0:
+              raise ValueError("overlap_paragraphs must be >= 0")
+          normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+          paragraphs = [part.strip() for part in normalized.split("\n\n") if part.strip()]
+          if not paragraphs:
+              return []
+          if overlap_paragraphs >= len(paragraphs):
+              return ["\n\n".join(paragraphs)]
+          window = overlap_paragraphs + 1
+          return [
+              "\n\n".join(paragraphs[start : start + window])
+              for start in range(0, len(paragraphs) - overlap_paragraphs)
+          ]
+    run: 把函数保存到本地文件，按题目里的六组输入检查返回的块和 ValueError。页面不会执行这段代码。

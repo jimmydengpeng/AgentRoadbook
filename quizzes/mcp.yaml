@@ -1,0 +1,46 @@
+topicId: mcp
+questions:
+  - id: mcp-choice-1
+    topicId: mcp
+    type: choice
+    difficulty: intermediate
+    prompt: 目录里有 lookup，allow 为假。host_call 应怎样处理？
+    options:
+      - id: a
+        text: 让服务器在连接时自行执行 lookup
+      - id: b
+        text: 抛出 ValueError，文本为宿主拒绝执行，并且不调用 invoke
+      - id: c
+        text: 把工具描述当作观察返回
+      - id: d
+        text: 从模型权重里读取已经完成的结果
+    answer: b
+    explanation: 目录只说明工具可以被请求。宿主拒绝时函数在调用 invoke 之前抛出 ValueError，服务器侧的函数不会运行。
+  - id: mcp-choice-2
+    topicId: mcp
+    type: choice
+    difficulty: intermediate
+    prompt: 按本页对 MCP 的说法，协议规定的是哪一件事？
+    options:
+      - id: a
+        text: 宿主必须执行目录中的每一个工具
+      - id: b
+        text: 工具怎样被描述和请求，宿主仍然决定是否执行
+      - id: c
+        text: 应用必须改用协议指定的某一家模型
+      - id: d
+        text: 用提示词替换工具实现后就可以不再调用
+    answer: b
+    explanation: 协议统一目录和调用的形状。它不规定应用怎样使用模型或这些上下文，发出调用的仍是宿主。
+  - id: mcp-short-1
+    topicId: mcp
+    type: short
+    difficulty: intermediate
+    prompt: 宿主、客户端和服务器各做什么？列出工具和调用工具为什么要分成两步？
+    note: 按本页的目录和 host_call 写，不需要某个 MCP 库。
+    reference: 宿主是使用模型的应用，决定是否执行。客户端维持到服务器的连接并把上下文拿回来。服务器提供工具描述，并在收到调用请求后执行。列出工具只得到目录，里面没有观察。宿主允许之后才发出调用，拒绝时不会执行函数。
+    rubric:
+      - 宿主决定是否执行
+      - 客户端负责连接和取回上下文
+      - 服务器提供描述并在被调用后执行
+      - 目录和调用是两步

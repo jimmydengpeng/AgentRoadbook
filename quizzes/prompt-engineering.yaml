@@ -1,0 +1,30 @@
+topicId: prompt-engineering
+questions:
+  - id: prompt-engineering-choice-1
+    topicId: prompt-engineering
+    type: choice
+    difficulty: beginner
+    prompt: 提示词已经要求只返回城市名。程序接下来应该怎么做？
+    options:
+      - id: a
+        text: 不再检查，因为模型必须服从提示词
+      - id: b
+        text: 仍然解析并检查结果是不是允许的值
+      - id: c
+        text: 把温度调到 0，格式问题就会消失
+      - id: d
+        text: 把同一提示词多发几次，取最长的一条
+    answer: b
+    explanation: 提示词只提高按格式回答的机会。多出来的解释、不在名单里的值，仍然要由程序拒绝。温度和重复发送都不能代替这次检查。
+  - id: prompt-engineering-short-1
+    topicId: prompt-engineering
+    type: short
+    difficulty: beginner
+    prompt: 任务、约束和输出格式在提示词里各管什么？为什么格式写对了，程序仍要检查？
+    note: 用自己的话写。没有标准措辞，对照要点即可。
+    reference: 任务说明要做什么，约束说明边界，输出格式说明结果的形状。模型仍可能多写解释、漏掉字段或给出不在允许范围内的值。接口级的结构约束也只保证形状，不保证内容正确。所以程序要解析并检查业务规则。
+    rubric:
+      - 任务说明要做什么
+      - 约束说明边界或不能做什么
+      - 输出格式说明结果的形状
+      - 提到缺字段、答非所问或值不合法时仍要拒绝

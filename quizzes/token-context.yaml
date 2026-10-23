@@ -1,0 +1,30 @@
+topicId: token-context
+questions:
+  - id: token-context-choice-1
+    topicId: token-context
+    type: choice
+    difficulty: beginner
+    prompt: 为什么不能用字数判断一段话能不能放进上下文窗口？
+    options:
+      - id: a
+        text: 因为窗口只计算汉字，英文和空格不占位置
+      - id: b
+        text: 因为模型按 token 计长度，token 不等于字数
+      - id: c
+        text: 因为所有模型的窗口都是同一个固定数字
+      - id: d
+        text: 因为超限时模型会自动把全文压成一个字
+    answer: b
+    explanation: 窗口的预算单位是 token。一个 token 可能对应一个字、一个词或一个标点，具体切分看模型，不能把字符数当成 token 数。
+  - id: token-context-short-1
+    topicId: token-context
+    type: short
+    difficulty: beginner
+    prompt: 上下文窗口装不下当前对话时，调用方可能遇到哪两种结果？被截掉的早期内容，模型这次还能不能读到？
+    note: 不要写某个具体模型的窗口长度。
+    reference: 一种结果是从较早的消息开始截断，把剩下的内容留在窗口里。另一种是接口直接拒绝这次请求。生成过程顶到边界时，回答还会停在半截。被截掉或没发送的早期内容，模型这次读不到。需要保留的事实要放在程序自己的状态里。
+    rubric:
+      - 提到较早的内容会被截断或丢掉
+      - 提到请求也可能被拒绝
+      - 说明被丢掉的内容这次模型读不到
+      - 没有写出某个具体模型的窗口大小或价格

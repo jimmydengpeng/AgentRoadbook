@@ -1,0 +1,30 @@
+topicId: agent-architecture
+questions:
+  - id: agent-architecture-choice-1
+    topicId: agent-architecture
+    type: choice
+    difficulty: beginner
+    prompt: 在本站的 Agent 基本架构里，模型点了一个工具名之后，谁执行对应的函数？
+    options:
+      - id: a
+        text: 模型在生成文本时直接执行这个函数
+      - id: b
+        text: 应用程序在已登记的工具里查找并执行
+      - id: c
+        text: 停止条件会在步数用尽前自动执行全部工具
+      - id: d
+        text: 状态里的观察字段会自己发起外部请求
+    answer: b
+    explanation: 模型输出的是行动请求，里面是工具名和参数。执行发生在应用程序里，而且只执行已经登记的函数。状态负责记住结果，停止条件负责结束循环，它们都不会代替这次执行。
+  - id: agent-architecture-short-1
+    topicId: agent-architecture
+    type: short
+    difficulty: beginner
+    prompt: 写出模型、工具、状态、停止条件各自负责的一件事。
+    note: 四块都要提到。用自己的话即可。
+    reference: 模型根据当前状态选择下一步，可以是最终答复，也可以是一次行动请求。工具是应用真正执行的函数。状态保存目标、已有观察和进度，供下一步读取。停止条件由应用掌握，例如模型给出最终答复，或达到最大步数。
+    rubric:
+      - 模型负责选择下一步
+      - 工具由应用执行
+      - 状态保留观察或进度
+      - 停止条件包含最终答复或步数上限中的至少一项

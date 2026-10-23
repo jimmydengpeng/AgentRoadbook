@@ -1,0 +1,29 @@
+topicId: rag-evaluation
+questions:
+  - id: rag-evaluation-choice-1
+    topicId: rag-evaluation
+    type: choice
+    difficulty: intermediate
+    prompt: 这一页怎么判断检索有没有取到答案？
+    options:
+      - id: a
+        text: 用一小批写好标准答案的问题，逐条看取回片段里有没有这句答案
+      - id: b
+        text: 算出一个召回率，并用论文里的准确率作为自己的成绩
+      - id: c
+        text: 只看最终回答是否通顺
+      - id: d
+        text: 向量分数最高的那条，就说明片段里已经有答案
+    answer: a
+    explanation: 评估检索时，每道题先写好答案，再看取回的原文包不包含这句。手写的几题只够逐条判断，不能折成召回率，也不能改用论文里的准确率。回答通顺或分数最高，都还没说明片段里有这句事实。
+  - id: rag-evaluation-short-1
+    topicId: rag-evaluation
+    type: short
+    difficulty: intermediate
+    prompt: 三道手写题里，有的片段包含答案，有的不包含。为什么不能据此写出一个召回率当作系统成绩？
+    reference: 这三题只用来练习「片段里有没有答案」这个判法。题是手写的，数量也只够把判断走通。召回率要有明确的题集、取回方式和统计口径。把这几题折成百分比，或抄论文里的准确率，都不是你这套资料库的成绩。短答案还可能在无关句子里碰巧出现，所以判完仍要打开片段看。
+    rubric:
+      - 说明示例题只演示逐条判断
+      - 说明不能把这几题折成系统的召回率
+      - 说明不能引用论文里的准确率作为自己的成绩
+      - 提到判断标准是取回片段里有没有答案

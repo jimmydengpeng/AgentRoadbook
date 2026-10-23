@@ -1,0 +1,68 @@
+topicId: multi-agent
+questions:
+  - id: multi-agent-choice-1
+    topicId: multi-agent
+    type: choice
+    difficulty: advanced
+    prompt: 规划角色给出了要查询的名字，执行角色需要看到本地记录。这份记录应怎样到达执行角色？
+    options:
+      - id: a
+        text: 两个角色直接商量，应用不保存交接字段
+      - id: b
+        text: 应用检查交接，执行工具，再把观察传给执行角色
+      - id: c
+        text: 执行角色从规划角色的权重里读取隐藏状态
+      - id: d
+        text: 把交接文本原样返回给用户，当作工具已经完成
+    answer: b
+    explanation: 交接字段由应用检查和保存。工具由应用执行，观察再作为执行角色的输入。权重里没有另一角色的信箱，交接文本本身也不是工具结果。
+  - id: multi-agent-short-1
+    topicId: multi-agent
+    type: short
+    difficulty: advanced
+    prompt: 规划角色返回的交接缺少 tool。应用应怎样处理？若交接有效，执行角色第一次请求行动、第二次给出最终文本，工具是在哪一次、由谁调用的？
+    note: 按 run_roles 的顺序写。两个角色都只返回字典。
+    reference: 交接缺少 tool 时，应用拒绝这次交接，不调用工具。交接有效时，执行角色第一次只返回行动请求，工具由应用调用。应用把观察传回之后，执行角色第二次才返回最终文本。
+    rubric:
+      - 缺字段时应用拒绝交接
+      - 缺字段时不调用工具
+      - 工具由应用在行动之后执行
+      - 最终文本出现在观察写回之后
+  - id: multi-agent-code-1
+    topicId: multi-agent
+    type: code
+    difficulty: advanced
+    prompt: 实现 run_roles(plan_role, work_role, lookup, goal, max_steps)。plan_role(goal) 返回交接。缺少 to、tool 或 arg，或 to 不是 worker 时，抛出 ValueError，不要调用 lookup。然后循环调用 work_role(handoff, observation)。final 返回其中的文本。action 时用 lookup 写入观察。其他类型抛出 ValueError 且不写入观察。步数用尽仍未 final 时抛出 RuntimeError，不要把观察当成返回值。不要访问网络。
+    examples:
+      - input: "交接含 to=worker、tool=lookup、arg=notes。lookup(notes) 为「议程：评审计划」。work_role 在观察为空时返回 action，有观察时返回 final。max_steps 为 2"
+        output: 议程：评审计划
+      - input: "同上，max_steps 为 1"
+        output: 抛出 RuntimeError，且不返回议程：评审计划
+      - input: "plan_role 只返回 to=worker，没有 tool 和 arg。max_steps 为 2"
+        output: 抛出 ValueError，且不调用 lookup
+    starter: |
+      def run_roles(plan_role, work_role, lookup, goal: str, max_steps: int) -> str:
+          """检查交接并在两个角色之间运行。成功时返回最终文本。
+
+          交接需要 to 为 worker，且含 tool 与 arg，否则抛出 ValueError。
+          work_role 返回 final 时返回 content。
+          返回 action 时把 lookup 的结果留给下一轮。
+          其他类型抛出 ValueError。超过 max_steps 抛出 RuntimeError。
+          """
+          raise NotImplementedError
+    hint: 先取交接并检查 to、tool、arg，缺了就抛出 ValueError。观察从空字符串开始。循环里先看 type：final 返回 content，action 才 lookup，两种都不是就抛出 ValueError。循环正常结束说明步数用尽，抛出 RuntimeError，不要返回观察字符串。
+    solution: |
+      def run_roles(plan_role, work_role, lookup, goal: str, max_steps: int) -> str:
+          handoff = plan_role(goal)
+          if handoff.get("to") != "worker" or "tool" not in handoff or "arg" not in handoff:
+              raise ValueError("交接缺少 to、tool 或 arg")
+          observation = ""
+          for _ in range(max_steps):
+              decision = work_role(handoff, observation)
+              if decision["type"] == "final":
+                  return decision["content"]
+              if decision["type"] != "action":
+                  raise ValueError(f"unknown decision type: {decision['type']}")
+              observation = lookup(decision["arg"])
+          raise RuntimeError(f"超过最大步数 {max_steps}")
+    run: 把函数保存到本地后，用假的规划角色、执行角色和本地 lookup 做三次检查。交接齐全且 max_steps 为 2 时，返回值应是 lookup 得到的文本。max_steps 为 1 时应抛出 RuntimeError，不能得到那段观察。交接缺少 tool 时应抛出 ValueError，并且 lookup 不被调用。页面不会执行这段代码。

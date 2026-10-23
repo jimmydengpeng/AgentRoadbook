@@ -1,0 +1,112 @@
+topicId: hybrid-search
+questions:
+  - id: hybrid-search-choice-1
+    topicId: hybrid-search
+    type: choice
+    difficulty: intermediate
+    prompt: 混合检索在合并之前，两路各自做什么？
+    options:
+      - id: a
+        text: 关键词和向量各取一份已排序的候选，再合并成一份名单
+      - id: b
+        text: 把两路分数乘上一对固定比例再相加，这对比例适用于任何资料
+      - id: c
+        text: 只用向量相似度排序，关键词只负责在结果里高亮
+      - id: d
+        text: 把整个资料库交给重排模型，一次排完
+    answer: a
+    explanation: 混合检索先保留关键词和向量各自的候选，再合成一份名单。比例没有放之四海的一对数字。只用向量会漏掉必须原样匹配的词。把整个库交给重排，就不再是两路召回再合并。
+  - id: hybrid-search-short-1
+    topicId: hybrid-search
+    type: short
+    difficulty: intermediate
+    prompt: 为什么不给混合检索一个通用的最佳权重？合并结果里至少要留下什么？
+    reference: 关键词和向量谁更重要，取决于问题和文档。一对比例在一套资料上合适，换一套资料可能漏掉编号，或漏掉换了说法的句子。本页的合并不接收权重。结果里要留下原文，以及这条来自哪一路。接到真实检索时还要保留来源和位置。
+    rubric:
+      - 说明权重取决于自己的问题和文档
+      - 没有把某一对比例说成普遍正确
+      - 说明合并结果要留下原文
+      - 提到要能看出命中来自哪一路，或要保留来源和位置
+  - id: hybrid-search-code-1
+    topicId: hybrid-search
+    type: code
+    difficulty: intermediate
+    prompt: 实现 merge_candidates。关键词名单和向量名单都是已经排好序的候选，每条有 id 和 text。合并时不接收权重，也不把两路分数相加。返回的每条有 id、text 和 lanes。两路都出现的条目在前，顺序与关键词名单一致，lanes 先写 keyword 再写 vector。然后是只出现在关键词名单里的，保持原顺序，lanes 只有 keyword。最后是只出现在向量名单里的，保持原顺序，lanes 只有 vector。比较前去掉 id 和 text 的首尾空白，返回值使用去掉空白后的字符串。同一路里去掉空白后 id 重复，或去掉空白后 id 或 text 为空，抛出 ValueError。同一个 id 在两路的 text 不一致，抛出 ValueError。两路都空时返回空列表。不要修改输入列表。可以写辅助函数。
+    examples:
+      - input: 关键词名单依次是 shipping、invoice、refund，向量名单依次是 invoice、remote、shipping，原文两路一致
+        output: 顺序为 shipping、invoice、refund、remote。前两条的 lanes 先是 keyword 再是 vector，refund 只有 keyword，remote 只有 vector
+      - input: 两路都是空列表
+        output: 空列表
+      - input: 关键词名单为空，向量名单依次是 remote、shipping
+        output: 顺序仍是 remote、shipping，lanes 都只有 vector
+      - input: 关键词名单里 shipping 出现两次
+        output: 抛出 ValueError
+      - input: 同一个 shipping 在关键词名单和向量名单里的原文不同
+        output: 抛出 ValueError
+      - input: 关键词名单里一条的 text 去掉空白后为空
+        output: 抛出 ValueError
+    starter: |
+      from typing import TypedDict
+
+      class Candidate(TypedDict):
+          id: str
+          text: str
+
+      class MergedHit(TypedDict):
+          id: str
+          text: str
+          lanes: list[str]
+
+      def merge_candidates(keyword: list[Candidate], vector: list[Candidate]) -> list[MergedHit]:
+          """合并两路候选。不接收权重。"""
+          raise NotImplementedError
+    hint: 先分别整理两路，去掉首尾空白，并拒绝空值和同一路里的重复 id。再按两边都有、仅关键词、仅向量三段拼接。两边都有和仅关键词都沿用关键词名单的顺序。原文不一致时抛出 ValueError。每次新建 lanes 列表。
+    solution: |
+      from typing import TypedDict
+
+      class Candidate(TypedDict):
+          id: str
+          text: str
+
+      class MergedHit(TypedDict):
+          id: str
+          text: str
+          lanes: list[str]
+
+      def normalize_lane(items: list[Candidate], lane: str) -> list[Candidate]:
+          seen: dict[str, str] = {}
+          cleaned: list[Candidate] = []
+          for item in items:
+              item_id = item["id"].strip()
+              text = item["text"].strip()
+              if not item_id or not text:
+                  raise ValueError(f"empty id or text in {lane}")
+              if item_id in seen:
+                  raise ValueError(f"duplicate id in {lane}: {item_id}")
+              seen[item_id] = text
+              cleaned.append({"id": item_id, "text": text})
+          return cleaned
+
+      def merge_candidates(keyword: list[Candidate], vector: list[Candidate]) -> list[MergedHit]:
+          """合并两路候选。不接收权重。"""
+          keyword_rows = normalize_lane(keyword, "keyword")
+          vector_rows = normalize_lane(vector, "vector")
+          vector_by_id = {row["id"]: row["text"] for row in vector_rows}
+          keyword_ids = {row["id"] for row in keyword_rows}
+          for row in keyword_rows:
+              other = vector_by_id.get(row["id"])
+              if other is not None and other != row["text"]:
+                  raise ValueError(f"text mismatch for {row['id']}")
+          merged: list[MergedHit] = []
+          # 两路都有的放前面，只为了让这份手写名单读得出谁被两边同时取到。
+          for row in keyword_rows:
+              if row["id"] in vector_by_id:
+                  merged.append({"id": row["id"], "text": row["text"], "lanes": ["keyword", "vector"]})
+          for row in keyword_rows:
+              if row["id"] not in vector_by_id:
+                  merged.append({"id": row["id"], "text": row["text"], "lanes": ["keyword"]})
+          for row in vector_rows:
+              if row["id"] not in keyword_ids:
+                  merged.append({"id": row["id"], "text": row["text"], "lanes": ["vector"]})
+          return merged
+    run: 把函数保存到本地文件，按题目里的六组输入检查顺序、空列表和 ValueError。页面不会执行这段代码。

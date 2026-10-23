@@ -1,0 +1,63 @@
+topicId: json-data
+questions:
+  - id: json-data-choice-1
+    topicId: json-data
+    type: choice
+    difficulty: beginner
+    prompt: json.loads 收到一段 JSON 数组时，Python 里得到什么？
+    options:
+      - id: a
+        text: 字典
+      - id: b
+        text: 列表
+      - id: c
+        text: 集合
+      - id: d
+        text: 仍然是原始文本，不会解码
+    answer: b
+    explanation: JSON 数组对应 Python 列表。对象才对应字典。loads 会完成解码；集合不是 JSON 数组的解码结果。
+  - id: json-data-short-1
+    topicId: json-data
+    type: short
+    difficulty: beginner
+    prompt: 读取工具参数里的 city 之前，为什么要先确认 JSON 的最外层是对象？
+    note: 提到数组或非法文本至少一种。
+    reference: 数组、字符串和数字都可以是合法 JSON，但不是参数表。应先用 json.loads 解码，非法文本捕获 JSONDecodeError，再确认结果是字典，然后按名字读取 city。这样不会把数组下标当成字段，也能把语法错误和缺字段分开。
+    rubric:
+      - 指出合法 JSON 不一定是对象
+      - 说明要先解码再判断字典
+      - 提到非法文本或缺字段应成为可区分的失败
+  - id: json-data-code-1
+    topicId: json-data
+    type: code
+    difficulty: beginner
+    prompt: 实现 read_city。它把 JSON 文本解成对象，并返回其中的非空字符串 city。非法 JSON、非对象，以及 city 缺失或不是非空字符串时，都抛出 ValueError。
+    examples:
+      - input: '{"city": "杭州"}'
+        output: 杭州
+      - input: "[]"
+        output: 抛出 ValueError
+      - input: "{"
+        output: 抛出 ValueError，原因来自 JSON 解码失败
+    starter: |
+      import json
+
+      def read_city(raw: str) -> str:
+          """从 JSON 对象中读取非空字符串字段 city。"""
+          raise NotImplementedError
+    hint: 用 json.loads 解码。捕获 JSONDecodeError 后抛出 ValueError，并用 from 保留原始错误。确认结果是 dict，再检查 city 是非空 str。
+    solution: |
+      import json
+
+      def read_city(raw: str) -> str:
+          try:
+              value = json.loads(raw)
+          except json.JSONDecodeError as error:
+              raise ValueError("tool arguments are not valid JSON") from error
+          if not isinstance(value, dict):
+              raise ValueError("tool arguments must be a JSON object")
+          city = value.get("city")
+          if not isinstance(city, str) or not city:
+              raise ValueError("city must be a non-empty string")
+          return city
+    run: 页面不执行代码。把函数保存到本地后，用上面三组输入自行断言。非法 JSON 那一组除了看到 ValueError，还要确认异常链上有 JSONDecodeError。

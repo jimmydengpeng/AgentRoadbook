@@ -1,0 +1,60 @@
+topicId: memory-update
+questions:
+  - id: memory-update-choice-1
+    topicId: memory-update
+    type: choice
+    difficulty: intermediate
+    prompt: 用户已经确认饮料偏好从「有糖」改成「无糖」。同一条记忆应该怎样更新？
+    options:
+      - id: a
+        text: 新旧两句都留在这个键上，让以后的请求自己选择
+      - id: b
+        text: 用「无糖」替换这个键上的旧文本，旧文本不再留在这条记录里
+      - id: c
+        text: 只把更正写进对话历史，长期记录保持「有糖」
+      - id: d
+        text: 在未确认时先写入「无糖」，避免以后忘记
+    answer: b
+    explanation: 同一件事用同一个键，确认后的新事实覆盖旧文本。未确认的说法不写入。对话历史里的旧句子要另外决定还发不发。
+  - id: memory-update-short-1
+    topicId: memory-update
+    type: short
+    difficulty: intermediate
+    prompt: replace_memory 在 confirmed 为假时，键 drink 上的「有糖」会怎样？确认后再写入「无糖」，这个键和对话历史里的旧句子各是什么状态？
+    note: 把记忆记录和对话历史分开写。
+    reference: 未确认时抛出错误，drink 仍是「有糖」。确认后这个键只留下「无糖」。对话历史里原来的句子不会被这个函数改写，除非整理历史的那一层自己处理。
+    rubric:
+      - 未确认时不写入，旧值还在
+      - 确认后键上的值是「无糖」
+      - 旧的「有糖」不再留在这个键上
+      - 对话历史里的旧句子不会自动改掉
+  - id: memory-update-code-1
+    topicId: memory-update
+    type: code
+    difficulty: intermediate
+    prompt: 实现 replace_memory。缺少 key 或 text 时抛出 ValueError。confirmed 为假时抛出 ValueError，且不要修改 store。confirmed 为真时用 text 替换该键的旧值。不要访问网络。
+    examples:
+      - input: "store 为 {drink: 有糖}，key 为 drink，text 为无糖，confirmed 为假"
+        output: 抛出 ValueError，drink 仍是有糖
+      - input: "store 为 {drink: 有糖}，key 为 drink，text 为无糖，confirmed 为真"
+        output: drink 为无糖，键上不再有有糖
+      - input: "key 为空字符串，text 为无糖，confirmed 为真"
+        output: 抛出 ValueError，store 不变
+    starter: |
+      def replace_memory(store: dict[str, str], key: str, text: str, confirmed: bool) -> None:
+          """用已确认的 text 替换 store[key]。
+
+          缺少 key 或 text，或 confirmed 为假时，抛出 ValueError 且不写入。
+          """
+          raise NotImplementedError
+    hint: 按 key、text、confirmed 的顺序检查，任何一项失败都在赋值前抛出 ValueError。三项都通过时执行 store[key] = text，让这个键只保留新文本。
+    solution: |
+      def replace_memory(store: dict[str, str], key: str, text: str, confirmed: bool) -> None:
+          if not key:
+              raise ValueError("缺少 key")
+          if not text:
+              raise ValueError("缺少 text")
+          if not confirmed:
+              raise ValueError(f"未确认，不写入 {key}")
+          store[key] = text
+    run: 把函数保存到本地后检查三次。未确认时 drink 仍是有糖。确认后 drink 只剩无糖。空 key 抛出 ValueError，原字典没有被写入。页面不会执行这段代码。

@@ -1,0 +1,82 @@
+topicId: planning
+questions:
+  - id: planning-choice-1
+    topicId: planning
+    type: choice
+    difficulty: intermediate
+    prompt: 计划列出了工具参数和完成标准。观察还没得到时，下一步应当怎么做？
+    options:
+      - id: a
+        text: 计划对象在返回给应用时自己调用工具
+      - id: b
+        text: 应用按参数调用工具，再用完成标准检查观察
+      - id: c
+        text: 把计划文本直接当作工具结果返回给用户
+      - id: d
+        text: 等模型在同一段回复里声明所有步骤都已完成
+    answer: b
+    explanation: 计划是步骤数据，上面没有可调用的函数。应用执行工具，并用步骤上的完成标准检查观察。模型声明完成，不能代替这次检查。
+  - id: planning-short-1
+    topicId: planning
+    type: short
+    difficulty: intermediate
+    prompt: 第一步的观察不满足完成标准。应用要记下什么，模型要改什么？若步数在后续步骤完成前用尽，调用方应看到什么？
+    note: 按计划的控制流写。工具由应用执行。
+    reference: 应用记下这次失败观察，不把它当成最终答复。模型根据失败观察给出新的步骤列表，新步骤仍由应用执行，并用完成标准检查。若步数用尽时还有未完成步骤，应用抛出能和成功文本区分开的错误，不返回半截观察。
+    rubric:
+      - 失败观察由应用保存
+      - 模型改的是步骤列表
+      - 新步骤仍由应用执行并检查
+      - 步数用尽的结果和成功文本可以区分
+  - id: planning-code-1
+    topicId: planning
+    type: code
+    difficulty: intermediate
+    prompt: 实现 run_plan(propose, lookup, max_steps)。propose(failure) 返回步骤列表，每步有 id、arg、expect。列表为空时抛出 ValueError，不要调用 lookup。有失败或还没有计划时，用 propose 重写计划，并清空已完成标记和已收集观察。lookup(arg) 的文本包含 expect 则该步完成，否则把观察记为 failure。全部步骤完成时，用中文分号连接观察并返回。步数用尽仍未全部完成时抛出 RuntimeError，不要返回半截结果。不要访问网络。
+    examples:
+      - input: "failure 为空时第一步 arg 为 missing；failure 以 unknown 开头时第一步 arg 为 notes；第二步 arg 始终为 mark。lookup(notes) 为「议程：评审计划」，lookup(mark) 为「已核对：评审计划」，其余为 unknown:名字。max_steps 为 3"
+        output: 议程：评审计划；已核对：评审计划
+      - input: "同上的 propose 和 lookup，max_steps 为 2"
+        output: 抛出 RuntimeError，且不返回议程：评审计划
+      - input: "同上的 propose 和 lookup，max_steps 为 1"
+        output: 抛出 RuntimeError
+      - input: "propose 始终返回空列表，max_steps 为 3"
+        output: 抛出 ValueError，且不调用 lookup
+    starter: |
+      def run_plan(propose, lookup, max_steps: int) -> str:
+          """按计划执行。成功时返回用中文分号接好的观察。
+
+          propose(failure) 返回步骤列表，每步含 id、arg、expect。
+          列表为空时抛出 ValueError，且不调用 lookup。
+          失败或尚无计划时重写计划，并清空完成标记和观察。
+          观察包含 expect 则该步完成，否则把观察记为 failure。
+          步数用尽仍未全部完成时抛出 RuntimeError。
+          """
+          raise NotImplementedError
+    hint: 用 failure、finished、observations 和 plan 四个变量。每轮若还没有计划或 failure 非空，就先 propose，空列表立刻抛出 ValueError。然后取第一个未完成步骤并 lookup。不包含 expect 就把观察写入 failure 并 continue。全部完成后用「；」连接观察返回。for 正常结束则抛出 RuntimeError，不要返回这句错误文本。
+    solution: |
+      def run_plan(propose, lookup, max_steps: int) -> str:
+          failure = ""
+          finished: list[str] = []
+          observations: list[str] = []
+          plan: list[dict[str, str]] = []
+          for _ in range(max_steps):
+              if not plan or failure:
+                  plan = propose(failure)
+                  if not plan:
+                      raise ValueError("计划是空的")
+                  finished = []
+                  observations = []
+                  failure = ""
+              pending = [step for step in plan if step["id"] not in finished]
+              step = pending[0]
+              observation = lookup(step["arg"])
+              if step["expect"] not in observation:
+                  failure = observation
+                  continue
+              finished.append(step["id"])
+              observations.append(observation)
+              if len(finished) == len(plan):
+                  return "；".join(observations)
+          raise RuntimeError(f"超过最大步数 {max_steps}")
+    run: 把函数保存到本地后，按四个例子用假 propose 和本地 lookup 检查。max_steps 为 3 且会先失败再改计划时，返回值应是两段观察用中文分号相连。max_steps 为 2 或 1 时应抛出 RuntimeError，不能得到半截观察。propose 始终返回空列表时应抛出 ValueError，并且 lookup 不被调用。页面不会执行这段代码。

@@ -1,0 +1,29 @@
+topicId: agentic-rag
+questions:
+  - id: agentic-rag-choice-1
+    topicId: agentic-rag
+    type: choice
+    difficulty: intermediate
+    prompt: Agentic RAG 里，谁决定检索，谁执行检索，循环怎样停止？
+    options:
+      - id: a
+        text: 模型决定要不要检索以及查什么，应用执行检索，并设有步数上限
+      - id: b
+        text: 模型直接读取数据库，应用只负责把文字展示出来
+      - id: c
+        text: 每次提问都检索固定的轮数，模型不能选择停下来回答
+      - id: d
+        text: 步数用尽时，把最后一条检索笔记当作成功的回答
+    answer: a
+    explanation: 模型只提出查或不查，以及查询文本。查索引仍由应用执行，和工具调用的分工一样。没有步数上限时，模型可以一直要求再查。步数用尽还没有最终答复，应作为失败停止，不能把笔记升级成回答。
+  - id: agentic-rag-short-1
+    topicId: agentic-rag
+    type: short
+    difficulty: intermediate
+    prompt: 模型已经决定要检索时，为什么检索仍要由应用执行，并且循环要有步数上限？
+    reference: 模型只提出要不要查、查什么。查哪份索引、超时和权限都在应用里，和工具调用一样。没有步数上限时，模型可以反复要求检索。步数用尽还没有最终答复，应作为失败停下来。已经取回的笔记是给下一步决策看的，不能把它当成成功的回答。
+    rubric:
+      - 说明模型决定是否检索以及查询是什么
+      - 说明检索由应用执行
+      - 说明需要步数上限
+      - 说明步数用尽时不能把笔记当成成功回答

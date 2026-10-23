@@ -1,0 +1,30 @@
+topicId: chatbot-vs-agent
+questions:
+  - id: chatbot-vs-agent-choice-1
+    topicId: chatbot-vs-agent
+    type: choice
+    difficulty: beginner
+    prompt: 一个客服程序始终先查订单，再把查询结果拼进提示词，最后让模型写回复。它更接近哪一种？
+    options:
+      - id: a
+        text: 单轮问答，因为最后是模型在生成文字
+      - id: b
+        text: 固定流水线，因为查订单的时机和顺序是代码写死的
+      - id: c
+        text: 本站说的 Agent，因为同时用到了模型和外部数据
+      - id: d
+        text: 只要保存了多轮聊天记录，就一定是 Agent
+    answer: b
+    explanation: 查订单发生在模型生成之前，而且每次都会发生，是人预先写好的顺序。模型和外部数据可以出现在流水线里。本站的 Agent 要由模型在运行时选择下一步动作。多轮记录本身只是更长的输入。
+  - id: chatbot-vs-agent-short-1
+    topicId: chatbot-vs-agent
+    type: short
+    difficulty: beginner
+    prompt: 多轮聊天会把之前的消息全部带回下一次请求。为什么它仍可能只是 chatbot？
+    note: 用自己的话写。没有标准措辞，对照要点即可。
+    reference: 多轮只是让模型看到更长的历史。如果模型每次只返回给用户的文字，程序不执行模型提出的动作，也没有把新的观察交回，控制权就和单轮问答一样。历史变长不改变谁来选择下一步。只有模型能在运行时选择动作，应用执行并把观察交回，直到停止条件，才是本站说的 Agent。
+    rubric:
+      - 说明多轮主要是在累积对话文本
+      - 指出模型没有选择下一步动作
+      - 说明应用没有执行动作并交回观察
+      - 没有把所有多轮对话都叫做 Agent

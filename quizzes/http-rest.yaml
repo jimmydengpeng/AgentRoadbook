@@ -1,0 +1,29 @@
+topicId: http-rest
+questions:
+  - id: http-rest-choice-1
+    topicId: http-rest
+    type: choice
+    difficulty: beginner
+    prompt: 按这一节对 HTTP 的说明，一次模型调用里请求是谁发出的？
+    options:
+      - id: a
+        text: 模型服务主动连接你的电脑，读取本地变量
+      - id: b
+        text: 你的程序作为客户端发出请求，服务端返回响应
+      - id: c
+        text: 虚拟环境在安装依赖时自动请求模型
+      - id: d
+        text: JSON 解析器看到花括号后自己发起网络请求
+    answer: b
+    explanation: HTTP 由客户端发起请求，服务端返回响应。模型调用里，你的程序是客户端。安装依赖和解析 JSON 都不会自动变成一次模型请求。
+  - id: http-rest-short-1
+    topicId: http-rest
+    type: short
+    difficulty: beginner
+    prompt: HTTP 无状态，对多轮对话里的历史消息意味着什么？
+    note: 说明历史应该放在哪里。
+    reference: 同一连接上两次成功请求之间，协议本身不保留对话。要让模型看到更早的内容，应用程序必须把那些消息放进这一次的请求体。只发送最新一句，服务端不会自动补上之前的话。Cookie 那种会话是另一套机制，不能代替请求体里的消息。
+    rubric:
+      - 说明协议不会自动记住上一次对话
+      - 说明历史要由应用程序放进本次请求体
+      - 没有把本地变量说成服务端已经能看见

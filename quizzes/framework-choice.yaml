@@ -1,0 +1,46 @@
+topicId: framework-choice
+questions:
+  - id: framework-choice-choice-1
+    topicId: framework-choice
+    type: choice
+    difficulty: intermediate
+    prompt: needs 是空集合。missing_layers 应返回什么？
+    options:
+      - id: a
+        text: 五层全部按名次排好
+      - id: b
+        text: 空列表，表示这些层都还不需要
+      - id: c
+        text: 只返回 components，因为组件建在图之上
+      - id: d
+        text: 抛出 ValueError，因为必须选一个框架
+    answer: b
+    explanation: 没有点名的能力就不会引入这些层。空集合返回空列表，调用方沿用现有的行动、观察和停止循环。
+  - id: framework-choice-choice-2
+    topicId: framework-choice
+    type: choice
+    difficulty: intermediate
+    prompt: needs 同时包含 shared-model-interface 和 explicit-state-graph。返回值应怎样理解？
+    options:
+      - id: a
+        text: 只留 components，图那一层可以删掉
+      - id: b
+        text: 两层都在，顺序只是检查顺序，不是排名
+      - id: c
+        text: 只留 state-graph，因为图运行时总是更好
+      - id: d
+        text: 改成 tool-protocol
+    answer: b
+    explanation: 两个需求对应 components 和 state-graph。列表按函数里的 if 顺序排列，靠前不表示这层更好。组件可以建在图上，也可以只取其中一层。
+  - id: framework-choice-short-1
+    topicId: framework-choice
+    type: short
+    difficulty: intermediate
+    prompt: 什么情况下沿用现有循环？集合里夹有未知能力时为什么不能返回已经认识的那些层？
+    note: 按 missing_layers 写。不要给框架排名。
+    reference: needs 为空时返回空列表，表示组件、图、协议、技能包和交接都还不需要，沿用现有循环。集合里有未知字符串时，函数先抛出 ValueError，不返回部分清单，避免在需求还没写清时选层。同时需要的多层可以都出现，顺序不是名次。
+    rubric:
+      - 空需求返回空列表并沿用现有循环
+      - 未知能力时抛出 ValueError
+      - 不会返回只含已知项的部分清单
+      - 多层同时出现也不构成排名

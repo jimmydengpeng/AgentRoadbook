@@ -1,0 +1,30 @@
+topicId: streaming
+questions:
+  - id: streaming-choice-1
+    topicId: streaming
+    type: choice
+    difficulty: intermediate
+    prompt: 流式输出和一次返回完整文本的差别是什么？
+    options:
+      - id: a
+        text: 同一次回答被切成多段，调用方按顺序拼回去
+      - id: b
+        text: 模型在服务端执行你的 Python 函数
+      - id: c
+        text: 每一段都是一份独立的完整回答，取最后一段即可
+      - id: d
+        text: 流式会绕过上下文窗口，所以不用再管长度
+    answer: a
+    explanation: 流式改变的是同一段生成结果如何送达。片段要按顺序拼接。它不执行本地函数，也不扩大这次请求的上下文窗口。
+  - id: streaming-short-1
+    topicId: streaming
+    type: short
+    difficulty: intermediate
+    prompt: 为什么不能只保留最后一个片段？流在中途失败时，已经拼出来的文本应该怎么看待？
+    note: 用自己的话写。没有标准措辞，对照要点即可。
+    reference: 每个片段通常只是同一次回答新增的一部分，完整文本要把它们按到达顺序接起来。只留最后一段会丢掉开头。中途失败时，已经拼上的文字是不完整的，不能当成这轮已经说完的助手消息写回历史。
+    rubric:
+      - 片段是同一次回答的一部分
+      - 需要按顺序拼接
+      - 中途失败时已有文本是不完整的
+      - 没有把流式说成多次互不相关的新问题

@@ -1,0 +1,46 @@
+topicId: langgraph
+questions:
+  - id: langgraph-choice-1
+    topicId: langgraph
+    type: choice
+    difficulty: intermediate
+    prompt: 写作节点刚写回草稿，approved 仍为假。下一步应怎样走？
+    options:
+      - id: a
+        text: 把草稿直接返回，当作已经确认
+      - id: b
+        text: 条件边进入等待，由应用请求确认并写回字段
+      - id: c
+        text: 边去修改模型权重里的隐藏状态
+      - id: d
+        text: 写作节点把自己的 approved 改成真
+    answer: b
+    explanation: 条件边只看 approved。为假时进入等待，确认函数的返回值才写回这个字段。写作节点不把草稿发布出去。
+  - id: langgraph-choice-2
+    topicId: langgraph
+    type: choice
+    difficulty: intermediate
+    prompt: 确认函数始终返回假，max_steps 为 1。run_until_confirmed 应怎样结束？
+    options:
+      - id: a
+        text: 返回草案文本
+      - id: b
+        text: 抛出 RuntimeError，不把草稿当作已确认的结果
+      - id: c
+        text: 把 approved 改成真再返回草稿
+      - id: d
+        text: 删除状态后重新写作并返回草稿
+    answer: b
+    explanation: 步数用尽仍然没有确认时，函数抛出 RuntimeError。草稿可以留在状态里，但不是成功返回值。
+  - id: langgraph-short-1
+    topicId: langgraph
+    type: short
+    difficulty: intermediate
+    prompt: 状态、节点和边分别是什么？人的确认记在哪里，谁可以把它写成已确认？
+    note: 按本页的草稿状态写，不需要安装 LangGraph。
+    reference: 状态是应用持有的快照，本页包含目标、草稿、是否已确认和步数。节点是读状态并返回更新的函数，写作节点只更新草稿和步数。边按状态选择下一步。人的确认记在 approved 字段，只有应用调用确认函数之后才写回，写作节点不会把它改成已确认。
+    rubric:
+      - 状态是应用持有的快照
+      - 节点返回更新，写作节点不负责确认
+      - 边按 approved 选择完成或等待
+      - 确认由应用写回字段

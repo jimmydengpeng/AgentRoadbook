@@ -1,0 +1,66 @@
+topicId: agent-loop
+questions:
+  - id: agent-loop-choice-1
+    topicId: agent-loop
+    type: choice
+    difficulty: beginner
+    prompt: 循环达到最大步数时，模型还在请求行动。调用方应怎样区分这次失败和一次成功答复？
+    options:
+      - id: a
+        text: 把「超过最大步数」这句话当作最终答复返回
+      - id: b
+        text: 成功时返回最终文本，步数用尽时抛出可以单独捕获的错误
+      - id: c
+        text: 继续循环，直到模型自己说停
+      - id: d
+        text: 返回空字符串，表示两种结束方式相同
+    answer: b
+    explanation: 成功路径的结果是最终文本。步数用尽是应用触发的失败，要用 RuntimeError 或其他能单独识别的结果表示。把失败句子当作普通回复，上游会把它当成任务已经完成。
+  - id: agent-loop-short-1
+    topicId: agent-loop
+    type: short
+    difficulty: beginner
+    prompt: 假 decide 第一次返回行动、第二次返回结束。写出这两步里应用各做了什么。若步数在第二次到来之前用尽，结果应是什么？
+    note: 按一次循环的控制流写，不需要特定厂商的字段名。
+    reference: 第一次决策是行动。应用执行对应动作，把观察写入轨迹，不把这一步当成最终答复。第二次决策是结束。应用返回其中的文本，循环停止。如果步数在第二次到来之前用尽，应用应抛出能和成功文本区分开的错误，而不是把观察当成答复。
+    rubric:
+      - 第一步执行动作并记录观察
+      - 第二步返回最终文本并停止
+      - 步数用尽时的结果和成功文本可以区分
+      - 没有在第一步就把观察交给用户当作完成
+  - id: agent-loop-code-1
+    topicId: agent-loop
+    type: code
+    difficulty: beginner
+    prompt: 实现带最大步数的 run_loop。假 decide 第一次返回行动、第二次返回结束时，返回最终文本。超过步数必须抛出 RuntimeError，让调用方能把它和成功字符串区分开。不要访问网络。
+    examples:
+      - input: "decide 第一次返回行动 notes，第二次返回最终文本「查完了」，max_steps 为 4"
+        output: 查完了
+      - input: "decide 每次都返回行动 notes，max_steps 为 2"
+        output: 抛出 RuntimeError
+      - input: "decide 第一次就返回行动 notes，max_steps 为 1"
+        output: 抛出 RuntimeError，且不返回 observation:notes
+    starter: |
+      def run_loop(decide, max_steps: int) -> str:
+          """按最大步数运行。成功时返回最终文本。
+
+          decide(observations) 返回 {"type": "action", "name": ...}
+          或 {"type": "final", "content": ...}。
+          行动把 "observation:<name>" 追加到 observations。
+          类型不是 action 或 final 时抛出 ValueError。
+          超过 max_steps 仍未结束时抛出 RuntimeError。
+          """
+          raise NotImplementedError
+    hint: 用 range(max_steps) 限制次数。先看 type。final 返回 content，action 追加观察后继续。两种都不是就抛出 ValueError。循环正常结束说明步数用尽，抛出 RuntimeError，不要返回这句错误文本。
+    solution: |
+      def run_loop(decide, max_steps: int) -> str:
+          observations: list[str] = []
+          for _ in range(max_steps):
+              decision = decide(observations)
+              if decision["type"] == "final":
+                  return decision["content"]
+              if decision["type"] != "action":
+                  raise ValueError(f"unknown decision type: {decision['type']}")
+              observations.append(f"observation:{decision['name']}")
+          raise RuntimeError(f"超过最大步数 {max_steps}")
+    run: 把函数保存到本地后，用假 decide 做三次检查。第一次行动、第二次结束且 max_steps 为 4 时，返回值应是最终文本。decide 始终返回行动且 max_steps 为 2 时，应抛出 RuntimeError。max_steps 为 1 且第一次就是行动时，也抛出 RuntimeError，不能得到观察字符串。页面不会执行这段代码。

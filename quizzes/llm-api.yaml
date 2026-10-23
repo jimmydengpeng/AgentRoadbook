@@ -1,0 +1,73 @@
+topicId: llm-api
+questions:
+  - id: llm-api-choice-1
+    topicId: llm-api
+    type: choice
+    difficulty: beginner
+    prompt: 调用模型接口时，密钥应该放在哪里？
+    options:
+      - id: a
+        text: 写进准备提交的源码字符串
+      - id: b
+        text: 只从环境变量读取，不放进消息
+      - id: c
+        text: 放进用户消息，让模型记住
+      - id: d
+        text: 写在网页前端的常量里
+    answer: b
+    explanation: 密钥是认证凭证，放在进程环境变量里，由请求代码放进认证头。写进源码、前端或提示词都会把凭证暴露给不该看到的人。
+  - id: llm-api-short-1
+    topicId: llm-api
+    type: short
+    difficulty: beginner
+    prompt: 一次聊天调用要发出什么、从响应里取什么？为什么不能假设所有厂商的字段路径相同？
+    note: 不需要背某一家的字段名。
+    reference: 应用程序发出一份带角色和内容的消息列表，再从响应 JSON 里取出助手文本。字段嵌套因接口而不同，同一家服务商也可以有两套形状。解析函数应按你接入的文档来写，缺字段时拒绝，而不是当成空回复。密钥从环境变量读取，不放进消息。
+    rubric:
+      - 发出的是带角色的消息列表
+      - 从响应里取出助手文本
+      - 提到字段位置因接口而不同
+      - 密钥来自环境变量，不放进消息
+  - id: llm-api-code-1
+    topicId: llm-api
+    type: code
+    difficulty: beginner
+    prompt: 实现 assistant_text。它解析一个假的聊天响应 JSON，取出助手文本。缺字段、类型不对或角色不是 assistant 时拒绝。
+    examples:
+      - input: '{"choices":[{"message":{"role":"assistant","content":"你好"}}]}'
+        output: 你好
+      - input: '{"choices":[]}'
+        output: 抛出 ValueError
+      - input: '{"choices":[{"message":{"role":"assistant"}}]}'
+        output: 抛出 ValueError
+    starter: |
+      import json
+
+      def assistant_text(payload_json: str) -> str:
+          """解析假的聊天响应，返回助手文本。
+
+          期望形状是 {"choices":[{"message":{"role":"assistant","content":"..."}}]}。
+          非法 JSON、缺字段、空列表、角色不对或 content 不是字符串时，抛出 ValueError。
+          """
+          raise NotImplementedError
+    hint: 先 json.loads。确认最外层是对象后，再取 choices 第一条里的 message。缺键、空列表或类型不对时抛出 ValueError，并用 from 保留原始错误。role 不是 assistant 或 content 不是字符串也要拒绝。
+    solution: |
+      import json
+
+      def assistant_text(payload_json: str) -> str:
+          try:
+              payload = json.loads(payload_json)
+          except json.JSONDecodeError as error:
+              raise ValueError("聊天响应不是合法 JSON") from error
+          if not isinstance(payload, dict):
+              raise ValueError("聊天响应必须是 JSON 对象")
+          try:
+              message = payload["choices"][0]["message"]
+              content = message["content"]
+              role = message["role"]
+          except (KeyError, IndexError, TypeError) as error:
+              raise ValueError("聊天响应缺少助手文本") from error
+          if role != "assistant" or not isinstance(content, str):
+              raise ValueError("聊天响应缺少助手文本")
+          return content
+    run: 把函数保存到本地后，分别传入正常 JSON、空的 choices，以及缺少 content 的对象。后两种应抛出 ValueError，并且异常链上保留原来的 IndexError 或 KeyError。

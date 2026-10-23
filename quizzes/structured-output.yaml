@@ -1,0 +1,30 @@
+topicId: structured-output
+questions:
+  - id: structured-output-choice-1
+    topicId: structured-output
+    type: choice
+    difficulty: beginner
+    prompt: 下面哪一项是工具调用，而不是结构化输出？
+    options:
+      - id: a
+        text: '模型按 schema 返回 {"city": "杭州", "status": "ok"}，程序读取这两个字段'
+      - id: b
+        text: '模型返回工具名 lookup_city 和参数 {"city": "杭州"}，程序据此执行函数'
+      - id: c
+        text: 模型返回一段介绍杭州的自然语言
+      - id: d
+        text: 程序把用户原话写入本地日志，模型没有参与
+    answer: b
+    explanation: 结构化输出的 JSON 是交付给程序的数据，程序读取字段即可。工具调用给出的是工具名和参数，应用还要执行函数。自然语言还没有按 schema 交付，写日志则没有模型的决策。
+  - id: structured-output-short-1
+    topicId: structured-output
+    type: short
+    difficulty: beginner
+    prompt: 为什么「模型返回了合法 JSON」仍不能说明它发起了一次工具调用？
+    note: 请同时写到交付和行动请求。不需要背某家接口的字段名。
+    reference: 合法 JSON 只说明文本能解析成数据。结构化输出里，这些字段就是给程序用的结果，程序可以按 schema 读取。工具调用还要另有约定：模型给出工具名和参数，应用去执行函数，再把观察交回。参数那一层 JSON 约束的是请求的形状，不表示函数已经执行。形状相似时，要看这份 JSON 是交付还是行动请求。
+    rubric:
+      - 说明合法 JSON 表示可以解析的数据
+      - 结构化输出的结果给程序直接使用
+      - 工具调用是请求应用执行动作
+      - 没有把两种 JSON 当成同一件事

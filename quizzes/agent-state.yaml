@@ -1,0 +1,66 @@
+topicId: agent-state
+questions:
+  - id: agent-state-choice-1
+    topicId: agent-state
+    type: choice
+    difficulty: intermediate
+    prompt: 同一个模型接连处理两个任务。第二个任务要记住的消息、工具观察和未完成步骤应放在哪里？
+    options:
+      - id: a
+        text: 写回模型权重，让两个任务共用一份会随观察变化的参数
+      - id: b
+        text: 放在应用保存的轨迹里，下一轮再从中选出视图
+      - id: c
+        text: 只打印在日志里，下一步模型自然能看见
+      - id: d
+        text: 放进模型文件名，不写入消息或观察列表
+    answer: b
+    explanation: 轨迹由应用保存，里面有消息、工具观察和未完成步骤。模型权重是另一份参数，这一轮的 record_turn 不改它。只写日志的观察进不了下一轮视图。
+  - id: agent-state-short-1
+    topicId: agent-state
+    type: short
+    difficulty: intermediate
+    prompt: 一次工具调用失败。轨迹里的观察和未完成步骤应怎样更新？下一轮交给模型的视图至少要让它看见什么？
+    note: 按 record_turn 的字段写。不要给出窗口长度。
+    reference: 失败观察要追加到轨迹的观察和消息里，步数加一，对应步骤继续留在未完成列表中。下一轮视图由应用从轨迹选出，至少包含这次失败文本和仍未完成的步骤。完整历史可以留在轨迹里，视图不必原样带走每一条消息。
+    rubric:
+      - 失败观察写入轨迹
+      - 未完成步骤保留
+      - 下一轮视图含最近观察和未完成步骤
+      - 视图由应用从轨迹中选出
+  - id: agent-state-code-1
+    topicId: agent-state
+    type: code
+    difficulty: intermediate
+    prompt: 实现 record_turn(state, observation, succeeded)。state 含 messages、observations、pending 和 steps。把观察追加到 messages 和 observations，步数加一。succeeded 为真且 pending 非空时去掉第一项，为假时 pending 保持不变。返回的视图含 goal、latest、pending 的一份新列表，以及 steps。不要返回整份 messages，也不要读写模型权重。不要访问网络。
+    examples:
+      - input: "pending 为 read 和 check，steps 为 0，observation 为「议程：评审计划」，succeeded 为 True"
+        output: latest 为「议程：评审计划」，pending 只剩 check，steps 为 1
+      - input: "同样的初始 pending，observation 为 unknown:notes，succeeded 为 False"
+        output: latest 为 unknown:notes，pending 仍是 read 和 check，steps 为 1
+      - input: "从 pending 为 read 和 check 连续两次调用，succeeded 都为 True"
+        output: 第二次的 pending 为空，steps 为 2
+    starter: |
+      def record_turn(state: dict, observation: str, succeeded: bool) -> dict:
+          """写入一条观察并返回下一轮视图。
+
+          追加 messages 与 observations，steps 加一。
+          succeeded 为真且 pending 非空时 pop 第一项。
+          返回 goal、latest、pending 的新列表和 steps。
+          """
+          raise NotImplementedError
+    hint: 先 append 观察，再把 steps 加一。只有 succeeded 为真并且 pending 还有项时才 pop(0)。返回的 pending 用 list(...) 复制，避免调用方改视图时改掉轨迹。不要把 messages 放进返回值。
+    solution: |
+      def record_turn(state: dict, observation: str, succeeded: bool) -> dict:
+          state["messages"].append({"role": "observation", "content": observation})
+          state["observations"].append(observation)
+          state["steps"] += 1
+          if succeeded and state["pending"]:
+              state["pending"].pop(0)
+          return {
+              "goal": state["goal"],
+              "latest": observation,
+              "pending": list(state["pending"]),
+              "steps": state["steps"],
+          }
+    run: 把函数保存到本地后，用带 pending、messages、observations 和 steps 的字典做三次检查。成功一次后 pending 应去掉第一项且 steps 为 1。失败一次后 pending 不变，latest 仍是失败文本。连续成功两次后 pending 为空且 steps 为 2。返回值里不应出现整份 messages。页面不会执行这段代码。

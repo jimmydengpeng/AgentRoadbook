@@ -1,0 +1,29 @@
+topicId: query-rewrite
+questions:
+  - id: query-rewrite-choice-1
+    topicId: query-rewrite
+    type: choice
+    difficulty: intermediate
+    prompt: 查询改写完成之后，检索之前应该做什么？
+    options:
+      - id: a
+        text: 读一遍改写结果，确认它仍是用户要问的事，再拿去检索
+      - id: b
+        text: 改写结果就是用户原意，可以直接送去检索
+      - id: c
+        text: 丢掉原问题，只保留改写，后面对不上也不再查看
+      - id: d
+        text: 用改写代替文档切分和向量索引
+    answer: a
+    explanation: 改写用来补上代词和缺失的限定条件。模型或对照表都可能补错主题。花括号还在时不能检索。括号填完之后，仍要和上一句对话对照，再决定用这句、用原问题，或再改一次。
+  - id: query-rewrite-short-1
+    topicId: query-rewrite
+    type: short
+    difficulty: intermediate
+    prompt: 用户说「偏远地区呢？」，上一句在问运费。改写成「偏远地区的运费怎么算？」之后，为什么还不能直接检索？
+    reference: 这句改写补上了上一句的主题，比单独的「偏远地区呢？」更适合拿去查。它是否对，取决于上一句是不是在问运费。上一句如果是在问发票，这句改写就跑题了。检索前要对照对话，确认主题和限定条件都补对了。占位符还没填完时也不能检索。
+    rubric:
+      - 说明改写是为了补上检索需要的主题或限定条件
+      - 说明改写可能和上一句对不上
+      - 说明检索前要对照原来的对话
+      - 没有把模型或规则的改写当成必然正确

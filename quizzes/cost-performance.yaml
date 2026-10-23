@@ -1,0 +1,60 @@
+topicId: cost-performance
+questions:
+  - id: cost-performance-choice-1
+    topicId: cost-performance
+    type: choice
+    difficulty: intermediate
+    prompt: used 加上本次数量后会超过 limit。spend 应让调用方看到什么？
+    options:
+      - id: a
+        text: 先把 used 改成超过上限的数，再返回成功
+      - id: b
+        text: 抛出 RuntimeError，used 保持为加上本次之前的值
+      - id: c
+        text: 把这次数量改成 0 并继续
+      - id: d
+        text: 返回空字符串，表示这次没有开销
+    answer: b
+    explanation: 超限是 RuntimeError，而且发生在写回 used 之前。调用方看到失败，预算不会变成已经超限的数字。
+  - id: cost-performance-short-1
+    topicId: cost-performance
+    type: short
+    difficulty: intermediate
+    prompt: input、output、retry、retrieval 各在记什么？为什么 guarded_retrieval 要先 spend 再 fetch？
+    note: 只谈计数，不要写金额、吞吐或耗时。
+    reference: input 和 output 是这一次送给模型的量和写回来的量。retry 是又准备做一次调用，retrieval 是又查一次资料。guarded_retrieval 先记账，spend 抛出时 fetch 不会执行，所以超限不会带着一份正常检索结果返回。
+    rubric:
+      - 说到输入和输出两类计数
+      - 重试和检索也要记账
+      - 先 spend 再 fetch
+      - 超限时 fetch 不会被调用
+  - id: cost-performance-code-1
+    topicId: cost-performance
+    type: code
+    difficulty: intermediate
+    prompt: 实现 spend。预算缺少 used 或 limit、种类不是 input、output、retry、retrieval、或数量为负时抛出 ValueError。加上之后超过 limit 时抛出 RuntimeError，并且不要修改 used。不要访问网络，也不要换算金额。
+    examples:
+      - input: used 为 0，limit 为 3，spend input 2
+        output: used 变为 2
+      - input: 上一步之后再 spend retry 2
+        output: 抛出 RuntimeError，used 仍为 2
+      - input: spend 的种类是 other
+        output: 抛出 ValueError，used 不变
+    starter: |
+      def spend(budget: dict[str, int], kind: str, units: int) -> None:
+          """先检查再记账。超限时抛出 RuntimeError，不改 used。"""
+          raise NotImplementedError
+    hint: 先确认 used 和 limit 都在。种类只允许四个名字，数量不能为负。用临时变量算加上之后的值，超过 limit 就抛出 RuntimeError。只有没超过时才写回 budget["used"]。
+    solution: |
+      def spend(budget: dict[str, int], kind: str, units: int) -> None:
+          if "used" not in budget or "limit" not in budget:
+              raise ValueError("预算缺少 used 或 limit")
+          if kind not in {"input", "output", "retry", "retrieval"}:
+              raise ValueError(f"未知的开销种类: {kind}")
+          if units < 0:
+              raise ValueError(f"{kind} 的用量不能为负")
+          used = budget["used"] + units
+          if used > budget["limit"]:
+              raise RuntimeError(f"{kind} 使用量 {used} 超过上限 {budget['limit']}")
+          budget["used"] = used
+    run: 本地用 used 0 和 limit 3 先记 2 个 input，used 应为 2。再记 2 个 retry 应抛出 RuntimeError，used 仍是 2。种类写错应抛出 ValueError。页面不会执行这段代码。

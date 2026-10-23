@@ -1,0 +1,68 @@
+topicId: agent-security
+questions:
+  - id: agent-security-choice-1
+    topicId: agent-security
+    type: choice
+    difficulty: advanced
+    prompt: 模型给出的工具名是 shell，不在允许列表里。run_tool 应怎样结束？
+    options:
+      - id: a
+        text: 把工具名交给系统命令试一次
+      - id: b
+        text: 抛出 PermissionError，不执行任何工具函数
+      - id: c
+        text: 返回密钥，让模型换一个参数再试
+      - id: d
+        text: 把它当成笔记不存在，抛出 KeyError
+    answer: b
+    explanation: 允许列表由应用掌握。不在列表里的名字在调用本地函数之前就抛出 PermissionError，调用方看到的是权限失败。
+  - id: agent-security-short-1
+    topicId: agent-security
+    type: short
+    difficulty: advanced
+    prompt: 工具不在允许列表、参数里出现密钥、笔记编号不存在，这三种情况调用方各看到什么异常？用户输入为什么不能拼进系统命令？
+    note: 只写防御时的结果，不要给出命令字符串。
+    reference: 不在允许列表时抛出 PermissionError，工具函数不会运行。参数里出现密钥或缺少 note_id 时抛出 ValueError，异常文本不含密钥。编号没有对应笔记时抛出 KeyError，表示工具已经执行但没找到数据。用户输入只作为本地函数的参数，不拼进系统命令，避免被 shell 解析。
+    rubric:
+      - 不允许的工具是 PermissionError
+      - 参数含密钥或缺字段是 ValueError
+      - 找不到笔记是 KeyError
+      - 输入不拼进系统命令
+  - id: agent-security-code-1
+    topicId: agent-security
+    type: code
+    difficulty: advanced
+    prompt: 实现 run_tool。只允许 lookup_note，它从本地字典读取 note_id 为 n1 的「本地笔记」。其他工具名抛出 PermissionError。参数值里出现密钥，或缺少 note_id 时抛出 ValueError，异常文本不要包含密钥。不要访问网络，也不要调用系统命令。
+    examples:
+      - input: 工具 lookup_note，note_id 为 n1，secret 为 test-secret
+        output: 本地笔记
+      - input: 工具名 shell，参数同样是 n1
+        output: 抛出 PermissionError，不返回笔记
+      - input: lookup_note 的某个参数值含有 test-secret
+        output: 抛出 ValueError，文本为「工具参数里出现了密钥」
+      - input: lookup_note 的 note_id 是空字符串，且参数值不含密钥
+        output: 抛出 ValueError，文本为「缺少 note_id」
+    starter: |
+      def run_tool(name: str, arguments: dict[str, str], secret: str) -> str:
+          """只执行允许列表里的本地函数。"""
+          raise NotImplementedError
+    hint: 先判断 name 是不是 lookup_note，不是就抛出 PermissionError。再把参数值拼成一份文本，检查 secret 是否出现。然后才读取 note_id。笔记字典只放 n1。任何分支都不要拼接系统命令。
+    solution: |
+      NOTES = {"n1": "本地笔记"}
+
+      def run_tool(name: str, arguments: dict[str, str], secret: str) -> str:
+          allowed = {"lookup_note"}
+          if name not in allowed:
+              raise PermissionError(f"工具不在允许列表: {name}")
+          blob = " ".join(arguments.values())
+          if secret and secret in blob:
+              raise ValueError("工具参数里出现了密钥")
+          if name == "lookup_note":
+              note_id = arguments.get("note_id", "")
+              if not note_id:
+                  raise ValueError("缺少 note_id")
+              if note_id not in NOTES:
+                  raise KeyError(note_id)
+              return NOTES[note_id]
+          raise PermissionError(f"工具不在允许列表: {name}")
+    run: 本地调用 lookup_note 且 note_id 为 n1，应返回「本地笔记」。工具名改为 shell 应抛出 PermissionError。参数值含有同一串密钥时应抛出 ValueError，异常文本里没有密钥。空 note_id 应抛出缺少字段的 ValueError。页面不会执行这段代码。

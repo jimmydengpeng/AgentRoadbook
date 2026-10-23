@@ -1,0 +1,46 @@
+topicId: langchain
+questions:
+  - id: langchain-choice-1
+    topicId: langchain
+    type: choice
+    difficulty: intermediate
+    prompt: fake_model 返回 type 为 tool、name 为 lookup。lookup 应在什么时候执行？
+    options:
+      - id: a
+        text: 模型函数返回字典之前就调用 lookup
+      - id: b
+        text: 应用确认名字在工具名单里之后再调用
+      - id: c
+        text: 名字写进名单时就已经执行完毕
+      - id: d
+        text: 提示词字符串直接调用这个函数
+    answer: b
+    explanation: 名单只表示允许请求。run_chain 看到 tool 并且名字在 tools 里，才调用对应函数。模型步骤只返回字典。
+  - id: langchain-choice-2
+    topicId: langchain
+    type: choice
+    difficulty: intermediate
+    prompt: max_steps 为 1，假模型先请求 lookup，还没有返回最终文本。run_chain 应怎样结束？
+    options:
+      - id: a
+        text: 返回工具得到的观察
+      - id: b
+        text: 抛出 RuntimeError，不把观察当作返回值
+      - id: c
+        text: 把工具请求改成最终文本再返回
+      - id: d
+        text: 从名单里删掉 lookup 后继续循环
+    answer: b
+    explanation: 步数用尽时循环结束，函数抛出 RuntimeError。观察留在局部变量里，调用方拿不到它。
+  - id: langchain-short-1
+    topicId: langchain
+    type: short
+    difficulty: intermediate
+    prompt: 模型、提示词、工具和调用链各自负责什么？工具名不在名单里时，应用应怎样处理？
+    note: 按本页的本地函数写。不需要安装 LangChain。
+    reference: 模型步骤只返回下一步的字典。提示词描述目标，自己不执行函数。工具是应用提供的函数，名单只表示可以请求。调用链核对类型和名字，再执行函数、写回观察，并在步数用尽时失败。工具名不在名单里时抛出 ValueError，不执行该函数。
+    rubric:
+      - 模型只返回下一步，不执行工具
+      - 提示词不执行函数
+      - 名单和真正执行是两件事
+      - 名字不在名单里时应用拒绝

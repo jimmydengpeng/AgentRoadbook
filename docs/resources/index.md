@@ -50,6 +50,18 @@ updatedAt: "2026-10-23"
 - [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks](https://arxiv.org/abs/2005.11401)
 - [ReAct: Synergizing Reasoning and Acting in Language Models](https://arxiv.org/abs/2210.03629)
 
+## 公开课程
+
+下面这些课程和仓库可以公开打开。本站正文不转载它们的章节，只把链接放在这里，方便你对照学习顺序。仓库许可证以各自仓库里的文件为准。Hello-Agents 的许可证是 CC BY-NC-SA 4.0，这里不收录它的正文。
+
+- [Hugging Face Agents Course](https://huggingface.co/learn/agents-course)
+- [AI Agents for Beginners](https://github.com/microsoft/ai-agents-for-beginners)
+- [LLM Universe](https://datawhalechina.github.io/llm-universe/)
+- [LangChain Academy](https://github.com/langchain-ai/langchain-academy)
+- [RAG From Scratch](https://github.com/langchain-ai/rag-from-scratch)
+
+读这些材料时，先分清哪一段是通用原理，哪一段是某个框架的 API。原理对不上时，以官方文档为准。
+
 ## 开源项目怎么选
 
 克隆一个仓库之前，先看它是否说明了许可、示例数据从哪来，以及工具执行是在示例进程里还是在远端。本站的三个[实战项目](/projects/index.md)故意不绑定某一个示例仓库，避免你在还没写清验收标准时先复制一整套业务代码。

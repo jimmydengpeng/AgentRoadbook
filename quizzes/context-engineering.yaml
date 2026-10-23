@@ -1,0 +1,30 @@
+topicId: context-engineering
+questions:
+  - id: context-engineering-choice-1
+    topicId: context-engineering
+    type: choice
+    difficulty: intermediate
+    prompt: 上下文工程在发出这一轮请求之前，主要决定什么？
+    options:
+      - id: a
+        text: 把库存里的历史、资料和指令全部放进这次请求
+      - id: b
+        text: 从指令、历史和外部资料里挑选这一次请求要带上的内容
+      - id: c
+        text: 改写模型权重，让模型记住没被选中的资料
+      - id: d
+        text: 只调整提示词里的形容词，材料列表原样全带
+    answer: b
+    explanation: 上下文工程挑选这一次要送进模型的内容。没被选中的材料留在外部列表里，不会因为改了形容词就自动进入请求。
+  - id: context-engineering-short-1
+    topicId: context-engineering
+    type: short
+    difficulty: intermediate
+    prompt: 指令是「只根据给定材料回答」，材料依次是「偏好无糖」「旧工单」「无关新闻」，条数上限是 2。返回的请求里有什么？没进去的两项留在哪里？这里的 2 能不能当作模型窗口？
+    note: 按本页例子的条数说明，不要写某个模型的窗口长度。
+    reference: 请求里是指令和「偏好无糖」。「旧工单」和「无关新闻」仍留在外部材料列表，不在这次返回值里。这里的 2 只是例子的条数，不是模型窗口。
+    rubric:
+      - 请求包含指令和「偏好无糖」
+      - 「旧工单」和「无关新闻」留在外部
+      - 说明这个条数不是模型窗口
+      - 没有把全部材料都放进请求

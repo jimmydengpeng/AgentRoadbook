@@ -109,4 +109,4 @@ def build_prompt(question: str, found: list[dict[str, str]]) -> str:
 ## 参考资料
 
 - [Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks](https://arxiv.org/abs/2005.11401)：RAG 这一提法的论文。本页只采用「先检索、再生成」的结构，没有引用其中的实验分数。
-- 切分、向量索引和混合检索会在后续章节展开。那些页面目前待编写，可以先用这篇把流水线的责任分清。
+- 切分、向量索引和混合检索在后续章节有初稿。可以先用这篇把流水线的责任分清，再去读那些初稿。

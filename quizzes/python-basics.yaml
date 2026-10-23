@@ -1,0 +1,29 @@
+topicId: python-basics
+questions:
+  - id: python-basics-choice-1
+    topicId: python-basics
+    type: choice
+    difficulty: beginner
+    prompt: 一轮 Agent 对话的消息历史，更适合用哪种结构保存？
+    options:
+      - id: a
+        text: 一个不断被覆盖的字符串，只留下最后一句
+      - id: b
+        text: 按发生顺序追加的列表，每条消息是一个字典
+      - id: c
+        text: 一个集合，自动去掉看起来重复的消息
+      - id: d
+        text: 写在函数默认参数里的列表，所有任务一起用
+    answer: b
+    explanation: 消息要保留顺序，并且能区分角色和内容，所以用列表里的字典。集合会丢掉顺序。默认参数里的列表会在多次调用之间共享。只留最后一句则无法把工具结果交回模型。
+  - id: python-basics-short-1
+    topicId: python-basics
+    type: short
+    difficulty: beginner
+    prompt: 工具函数里用空的 except 吃掉异常，为什么会让后面的 Agent 循环误判？
+    note: 用自己的话写。没有标准措辞，对照要点即可。
+    reference: 空的 except 把失败变成了正常返回，调用方分不清工具崩溃和「没有内容」。循环会把这个结果当成观察，继续下一步。应当抛出写明步骤的错误，并用异常链保留原始原因，或者返回一种能标明失败的结果。
+    rubric:
+      - 指出失败被当成了正常返回或成功的观察
+      - 说明调用方无法区分崩溃和空结果
+      - 提到应继续传递错误或保留原始原因

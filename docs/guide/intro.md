@@ -30,7 +30,7 @@ Agent Roadbook 是一份面向开发者的开源学习路书。它按 Agent 开�
 - 我能不能用一道题检查自己有没有理解
 - 做完之后下一节是什么
 
-当前已经写完的示例是 [什么是 AI Agent](/agent/what-is-agent.md)、[Tool Calling](/agent/tool-calling.md) 和 [基础 RAG](/rag/basics.md)。其余章节留在目录里，页面会标明「待编写」，避免把空链接藏起来。
+从 [学习路线](/guide/learning-path.md) 按顺序读。其中 [什么是 AI Agent](/agent/what-is-agent.md)、[Tool Calling](/agent/tool-calling.md) 和 [基础 RAG](/rag/basics.md) 已经发布，其余章节也可以直接打开。以后补充的是某一节的细节，阅读顺序不变。
 
 ## 为谁而写
 

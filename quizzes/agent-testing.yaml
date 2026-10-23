@@ -1,0 +1,63 @@
+topicId: agent-testing
+questions:
+  - id: agent-testing-choice-1
+    topicId: agent-testing
+    type: choice
+    difficulty: intermediate
+    prompt: 假决策每次都返回行动，max_steps 为 2。调用方应怎样区分这次结束和一次成功答复？
+    options:
+      - id: a
+        text: 把最后一条观察当作最终文本返回
+      - id: b
+        text: 抛出 RuntimeError，测试可以单独断言这种异常
+      - id: c
+        text: 改为请求真实模型，直到它说停
+      - id: d
+        text: 返回空字符串，表示两种结束相同
+    answer: b
+    explanation: 成功路径返回最终文本。步数用尽抛出 RuntimeError。测试断言异常类型或 classify_stop 返回的 step-limit，就不会把中断当成完成。
+  - id: agent-testing-short-1
+    topicId: agent-testing
+    type: short
+    difficulty: intermediate
+    prompt: 假模型和录制工具在测试里各代替什么？未知工具和步数用尽，调用方各看到什么？
+    note: 不需要真实接口的字段名。
+    reference: 假模型代替决策，录制函数代替工具，两者都不访问网络。未知工具会把 error:unknown tool 加名字写进观察，下一步决策还能读到。步数用尽时抛出 RuntimeError，不返回观察字符串。录制函数自己抛出的异常会原样出去，不会改写成观察。
+    rubric:
+      - 决策和工具都用本地假实现
+      - 未知工具写入观察而不是被跳过
+      - 步数用尽抛出 RuntimeError
+      - 成功返回的是最终文本
+  - id: agent-testing-code-1
+    topicId: agent-testing
+    type: code
+    difficulty: intermediate
+    prompt: 实现 run_with_fakes。final 返回 content。action 执行录制工具并把结果写入观察。工具不在字典里时写入 error:unknown tool 加名字，然后继续。类型不合法抛出 ValueError。步数用尽抛出 RuntimeError。不要访问网络。
+    examples:
+      - input: 第一次行动 lookup，录制结果为「笔记」，第二次 final 返回最后一条观察，max_steps 为 4
+        output: 笔记
+      - input: 每次都行动 lookup，max_steps 为 2
+        output: 抛出 RuntimeError
+      - input: 第一次行动 shell，工具字典里没有它；第二次把最后一条观察当作 final，max_steps 为 4
+        output: error:unknown tool shell
+    starter: |
+      def run_with_fakes(decide, tools, max_steps: int) -> str:
+          """用假决策和录制工具运行。超步数抛出 RuntimeError。"""
+          raise NotImplementedError
+    hint: 用 range(max_steps) 限制次数。final 立刻返回 content。action 若找不到工具，就追加 error:unknown tool 和名字。找得到就追加工具返回值。循环走完仍没有 final 时抛出 RuntimeError。
+    solution: |
+      def run_with_fakes(decide, tools, max_steps: int) -> str:
+          observations: list[str] = []
+          for _ in range(max_steps):
+              decision = decide(observations)
+              if decision["type"] == "final":
+                  return decision["content"]
+              if decision["type"] != "action":
+                  raise ValueError(f"unknown decision type: {decision['type']}")
+              name = decision["name"]
+              if name not in tools:
+                  observations.append(f"error:unknown tool {name}")
+                  continue
+              observations.append(tools[name](decision.get("argument", "")))
+          raise RuntimeError(f"超过最大步数 {max_steps}")
+    run: 用本地假决策做三次检查。行动一次再结束，应返回录制好的文本。始终行动且 max_steps 为 2 时，应抛出 RuntimeError。未知工具后再结束，返回值应是 error:unknown tool 加那个名字。页面不会执行这段代码。

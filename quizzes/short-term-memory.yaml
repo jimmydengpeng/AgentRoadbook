@@ -1,0 +1,30 @@
+topicId: short-term-memory
+questions:
+  - id: short-term-memory-choice-1
+    topicId: short-term-memory
+    type: choice
+    difficulty: beginner
+    prompt: 这一轮任务里核对名单的中间笔记，应该放在哪里？
+    options:
+      - id: a
+        text: 写进跨会话存储，让以后每个任务都能默认读到
+      - id: b
+        text: 留在这一轮任务自己的列表里，不自动写进长期存储
+      - id: c
+        text: 写进模型权重，使所有用户共享这句笔记
+      - id: d
+        text: 只打印在日志里，下一步循环也能从日志读到
+    answer: b
+    explanation: 短期笔记属于这一轮任务的列表。下一步要看见它，就从这份列表里读或抄进请求。它不会自动进入跨会话存储。
+  - id: short-term-memory-short-1
+    topicId: short-term-memory
+    type: short
+    difficulty: beginner
+    prompt: task_a 记下了「核对名单」和「写出结论」。finish_task(task_a) 返回哪一句？新建的空列表 task_b 为什么读不到「核对名单」？
+    note: 按这一轮任务各自持有的列表说明。
+    reference: finish_task 返回 task_a 的最后一句「写出结论」，更早的「核对名单」仍留在 task_a。task_b 是另一份列表，函数没有把 task_a 写进长期存储，所以 task_b 读不到那句笔记。
+    rubric:
+      - 返回的是最后一句「写出结论」
+      - 「核对名单」仍留在 task_a
+      - task_b 是另一份列表，读不到 task_a 的笔记
+      - 没有把笔记写成跨会话存储

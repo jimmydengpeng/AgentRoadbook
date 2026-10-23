@@ -1,0 +1,65 @@
+topicId: fastapi-service
+questions:
+  - id: fastapi-service-choice-1
+    topicId: fastapi-service
+    type: choice
+    difficulty: intermediate
+    prompt: 请求体里没有 message。handle_turn 应让调用方看到什么？
+    options:
+      - id: a
+        text: 调用 reply，并返回空字符串作为正常回复
+      - id: b
+        text: 抛出 ValueError，说明缺少 message，并且不调用 reply
+      - id: c
+        text: 返回带有密钥的字典，方便对照是哪一次请求
+      - id: d
+        text: 返回成功字典，把「请求缺少 message」放进 reply
+    answer: b
+    explanation: 缺字段发生在调用 reply 之前，结果是 ValueError，不是成功字典。异常文本只说明缺少 message，响应路径上不会出现密钥。
+  - id: fastapi-service-short-1
+    topicId: fastapi-service
+    type: short
+    difficulty: intermediate
+    prompt: 请求、配置和密钥分别放在哪里？message 里出现了密钥时，调用方看到什么，reply 会不会执行？
+    note: 按处理函数的边界写，不需要背某个版本的类名。
+    reference: 请求只放这次送来的内容，配置放模型名这类可以返回的项，密钥只从服务侧的环境字典进入。message 里出现密钥时，函数抛出 ValueError，文本说明请求正文里出现了密钥，但不包含密钥本身。reply 不会执行，调用方也拿不到成功字典。
+    rubric:
+      - 请求、配置和密钥是分开的三份数据
+      - 密钥不来自请求体，也不进入返回值
+      - 正文含密钥时抛出 ValueError
+      - reply 在这次失败里不会被调用
+  - id: fastapi-service-code-1
+    topicId: fastapi-service
+    type: code
+    difficulty: intermediate
+    prompt: 实现 handle_turn。缺少 message、未配置密钥、请求正文含有密钥、缺少 model 时都抛出 ValueError，并且不要调用 reply。成功时返回只含 model 和 reply 的字典。不要访问网络，异常文本里不要带上密钥。
+    examples:
+      - input: message 为「你好」，model 为 local，secret 为 test-secret，reply 返回「收到:你好」
+        output: '{"model": "local", "reply": "收到:你好"}，其中没有 test-secret'
+      - input: request 是空字典，其余参数齐全
+        output: 抛出 ValueError，文本为「请求缺少 message」，reply 不被调用
+      - input: message 为「请使用 test-secret」，secret 也是 test-secret
+        output: 抛出 ValueError，文本为「请求正文里出现了密钥」，reply 不被调用
+    starter: |
+      def handle_turn(request, config, secret, reply) -> dict:
+          """校验请求、配置和密钥，通过后才调用 reply。
+
+          缺少 message、secret 为空、message 含有 secret、缺少 model
+          时抛出 ValueError。成功时返回 {"model", "reply"}。
+          """
+          raise NotImplementedError
+    hint: 按 message、secret、密钥是否混进正文、model 的顺序检查。每一项失败都立刻抛出 ValueError。四项都通过之后才调用 reply(message)，返回值里不要放 secret。
+    solution: |
+      def handle_turn(request, config, secret, reply) -> dict:
+          message = request.get("message", "")
+          if not message:
+              raise ValueError("请求缺少 message")
+          if not secret:
+              raise ValueError("密钥未配置")
+          if secret in message:
+              raise ValueError("请求正文里出现了密钥")
+          model = config.get("model", "")
+          if not model:
+              raise ValueError("配置缺少 model")
+          return {"model": model, "reply": reply(message)}
+    run: 把函数保存到本地后用假 reply 检查三次。正常消息返回不含密钥的字典。空请求抛出缺少 message，并且 reply 没有被调用。消息里含有同一串密钥时抛出 ValueError，异常文本里没有这串密钥。页面不会执行这段代码。

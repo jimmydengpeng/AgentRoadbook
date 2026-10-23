@@ -1,0 +1,62 @@
+topicId: production-practice
+questions:
+  - id: production-practice-choice-1
+    topicId: production-practice
+    type: choice
+    difficulty: advanced
+    prompt: clock 已经大于 deadline。run_task 应让调用方看到什么？
+    options:
+      - id: a
+        text: 返回 status 为 ok 的主路径结果
+      - id: b
+        text: 抛出 TimeoutError，主路径和备份都不会执行
+      - id: c
+        text: 返回 status 为 degraded，并把它当成成功交付
+      - id: d
+        text: 返回空列表，表示服务已经部署
+    answer: b
+    explanation: 超时在调用主路径之前抛出 TimeoutError。work 和 backup 都不会执行，调用方也不会收到 status 为 ok 的字典。
+  - id: production-practice-short-1
+    topicId: production-practice
+    type: short
+    difficulty: advanced
+    prompt: 超时、主路径失败、需要人工、清单未齐，调用方各看到什么？release_ready 返回空列表表示什么？
+    note: clock 只是例子里的逻辑时钟。不要写部署结果或耗时。
+    reference: 超时抛出 TimeoutError，主路径不会运行。主路径抛出异常且备份返回了值时，结果的 status 是 degraded。needs_human 为 yes 时 accept_result 抛出 RuntimeError，不返回 value。清单里仍为假的名字会出现在 release_ready 的列表里。空列表只表示传入的四项都为真，不表示已经部署。
+    rubric:
+      - 超时是 TimeoutError 且不会调用主路径
+      - 降级结果的 status 是 degraded
+      - 人工接管时不会把 value 当完成
+      - 空清单只表示这四项为真
+  - id: production-practice-code-1
+    topicId: production-practice
+    type: code
+    difficulty: advanced
+    prompt: 实现 run_task。clock 大于 deadline 时抛出 TimeoutError，并且不要调用 work 或 backup。work 成功时返回 status 为 ok、source 为 primary。work 抛出异常时调用 backup，返回 status 为 degraded、source 为 backup，reason 为异常类名。不要访问网络。
+    examples:
+      - input: work 返回「主」，backup 返回「备」，clock 为 1，deadline 为 5
+        output: status 为 ok，source 为 primary，value 为「主」
+      - input: clock 为 6，deadline 为 5
+        output: 抛出 TimeoutError，work 和 backup 都不执行
+      - input: work 抛出 RuntimeError，backup 返回「备」，clock 未超过 deadline
+        output: status 为 degraded，source 为 backup，value 为「备」，reason 为 RuntimeError
+    starter: |
+      def run_task(work, backup, clock: int, deadline: int) -> dict:
+          """超时抛出 TimeoutError。主路径失败时返回 degraded。"""
+          raise NotImplementedError
+    hint: 函数一开始就比较 clock 和 deadline，大于则抛出 TimeoutError。然后调用 work。只有 work 抛出异常时才调用 backup，并把异常类名放进 reason。成功字典的 status 是 ok。
+    solution: |
+      def run_task(work, backup, clock: int, deadline: int) -> dict:
+          if clock > deadline:
+              raise TimeoutError(f"任务在 {deadline} 之前没有完成")
+          try:
+              value = work()
+          except Exception as error:
+              return {
+                  "status": "degraded",
+                  "source": "backup",
+                  "value": backup(),
+                  "reason": type(error).__name__,
+              }
+          return {"status": "ok", "source": "primary", "value": value}
+    run: 用两个本地函数检查三条路径。未超时且 work 成功时，返回值的 status 是 ok。clock 大于 deadline 时抛出 TimeoutError，并且两个函数都没有被调用。work 抛出异常时返回 degraded，value 来自 backup。页面不会执行这段代码。

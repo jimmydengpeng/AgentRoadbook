@@ -1,0 +1,64 @@
+topicId: memory-storage
+questions:
+  - id: memory-storage-choice-1
+    topicId: memory-storage
+    type: choice
+    difficulty: intermediate
+    prompt: 调用方把记忆写到一份存储时，写入失败应如何表示？
+    options:
+      - id: a
+        text: 返回空字符串，表示这次没有写上
+      - id: b
+        text: 抛出让调用方能单独识别的错误，并且不要把失败当成写入成功
+      - id: c
+        text: 返回 None，和键本来就不存在使用同一种结果
+      - id: d
+        text: 把错误说明写进该键，下次当作事实读出来
+    answer: b
+    explanation: 空字符串和 None 会和「没有这条记忆」或「写上了空内容」混在一起。字段不合法用 ValueError，存储拒绝写入用带原始原因的 RuntimeError。
+  - id: memory-storage-short-1
+    topicId: memory-storage
+    type: short
+    difficulty: intermediate
+    prompt: 同一份字典成功写入 city 为「杭州」后，load_fact 得到什么？换一份新的空字典再读 city，得到什么？这两种结果和写入失败有什么不同？
+    note: 按键读取。不要把没找到写成异常。
+    reference: 同一份字典上 load_fact 得到「杭州」。新的空字典上得到 None，表示查过了但没有这个键。写入失败是 ValueError 或 RuntimeError，不是 None，也不是空字符串。
+    rubric:
+      - 同一份存储读回「杭州」
+      - 另一份空存储得到 None
+      - None 表示没有这个键
+      - 写入失败用异常表示，而不是 None
+  - id: memory-storage-code-1
+    topicId: memory-storage
+    type: code
+    difficulty: intermediate
+    prompt: 实现 save_fact。缺少 key 或 text 时抛出 ValueError，并且不要写入。赋值成功则记录留在传入的 store。赋值抛出异常时抛出 RuntimeError，并保留原始原因。不要返回空字符串代替失败，也不要访问网络。
+    examples:
+      - input: "空字典写入 key 为 city、text 为杭州"
+        output: 字典中 city 为杭州
+      - input: "key 为空字符串，text 为杭州"
+        output: 抛出 ValueError，字典不变
+      - input: "key 为 city，text 为空字符串"
+        output: 抛出 ValueError，字典不变
+      - input: "store 在赋值时抛出 OSError"
+        output: 抛出 RuntimeError，且杭州没有被写成成功记录
+    starter: |
+      def save_fact(store: dict[str, str], key: str, text: str) -> None:
+          """把 text 写到 store[key]。
+
+          缺少 key 或 text 时抛出 ValueError，不写入。
+          赋值失败时抛出 RuntimeError，并保留原始异常。
+          """
+          raise NotImplementedError
+    hint: 先检查 key 和 text，这两项失败不要进入赋值。然后再执行 store[key] = text。用 try 包住赋值，except Exception 时抛出 RuntimeError，并用 from 留下原因。不要在失败时 return。
+    solution: |
+      def save_fact(store: dict[str, str], key: str, text: str) -> None:
+          if not key:
+              raise ValueError("缺少 key")
+          if not text:
+              raise ValueError("缺少 text")
+          try:
+              store[key] = text
+          except Exception as error:
+              raise RuntimeError(f"写入记忆 {key} 失败") from error
+    run: 把函数保存到本地后检查四次。正常字典写入后能按键读回杭州。空 key 或空 text 抛出 ValueError，原字典没有新键。赋值抛出 OSError 的存储应变成 RuntimeError，并且不能读到一条成功写入的杭州。页面不会执行这段代码。

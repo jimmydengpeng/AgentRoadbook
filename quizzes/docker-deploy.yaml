@@ -1,0 +1,58 @@
+topicId: docker-deploy
+questions:
+  - id: docker-deploy-choice-1
+    topicId: docker-deploy
+    type: choice
+    difficulty: intermediate
+    prompt: 准备写进镜像的环境变量里有 API_KEY。reject_baked_secrets 应怎样对待这份配置？
+    options:
+      - id: a
+        text: 正常返回，构建可以带上这个键
+      - id: b
+        text: 抛出 ValueError，错误文本含有键名且不含值
+      - id: c
+        text: 把值打印出来，确认之后继续
+      - id: d
+        text: 把键改写入启动说明，函数仍返回成功
+    answer: b
+    explanation: 像密钥的键名不能进入镜像配置。函数抛出 ValueError，调用方在构建前就看到拒绝，异常里不包含密钥的值。
+  - id: docker-deploy-short-1
+    topicId: docker-deploy
+    type: short
+    difficulty: intermediate
+    prompt: 镜像环境和启动环境有什么差别？值为空的 PASSWORD，以及整段叫 TOKENIZER 的键，检查结果各是什么？
+    note: 按本页的本地检查函数说明，不需要写出构建命令。
+    reference: 镜像环境会随镜像分发，不能放密钥。启动环境在容器启动时另交，不交给 reject_baked_secrets。PASSWORD 即使值为空也抛出 ValueError，因为键名已经表示密钥位置。TOKENIZER 是一整段，不等于 TOKEN，函数正常返回。
+    rubric:
+      - 镜像环境会跟着镜像走
+      - 启动环境不放进这个检查
+      - 空的 PASSWORD 也会被拒绝
+      - TOKENIZER 不会被当成 TOKEN
+  - id: docker-deploy-code-1
+    topicId: docker-deploy
+    type: code
+    difficulty: intermediate
+    prompt: 实现 reject_baked_secrets。键名按下划线或连字符拆段后，某一段是 SECRET、TOKEN 或 PASSWORD，或者同时有 API 和 KEY，就抛出 ValueError。错误文本包含键名，不要包含值。其他键正常返回。不要访问网络。
+    examples:
+      - input: '{"PATH": "/usr/bin"}'
+        output: 正常返回
+      - input: '{"API_KEY": "test-secret"}'
+        output: 抛出 ValueError，文本含 API_KEY，不含 test-secret
+      - input: '{"PASSWORD": ""}'
+        output: 抛出 ValueError
+      - input: '{"TOKENIZER": "local"}'
+        output: 正常返回
+    starter: |
+      def reject_baked_secrets(image_env: dict[str, str]) -> None:
+          """拒绝把像密钥的键放进镜像环境。命中时抛出 ValueError。"""
+          raise NotImplementedError
+    hint: 把键名转成大写，再把 - 换成 _ 后按 _ 拆开。PASSWORD、SECRET、TOKEN 看某一整段是否相等。API_KEY 看两段是否同时存在。抛出的句子里只放键名。
+    solution: |
+      def reject_baked_secrets(image_env: dict[str, str]) -> None:
+          for key in image_env:
+              parts = key.upper().replace("-", "_").split("_")
+              has_api_key = "API" in parts and "KEY" in parts
+              has_marker = any(part in {"SECRET", "TOKEN", "PASSWORD"} for part in parts)
+              if has_api_key or has_marker:
+                  raise ValueError(f"密钥不能写进镜像环境变量: {key}")
+    run: 本地用只含 PATH 的字典调用，应正常返回。API_KEY 和空值的 PASSWORD 都应抛出 ValueError，并且异常文本里没有值。TOKENIZER 应正常返回。页面不会执行这段代码。

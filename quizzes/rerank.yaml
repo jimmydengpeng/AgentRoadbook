@@ -1,0 +1,98 @@
+topicId: rerank
+questions:
+  - id: rerank-choice-1
+    topicId: rerank
+    type: choice
+    difficulty: intermediate
+    prompt: 重排和第一轮召回怎么分工？
+    options:
+      - id: a
+        text: 重排只对第一轮已经取回的少量候选重新排序
+      - id: b
+        text: 重排扫描整个资料库，第一轮召回可以省掉
+      - id: c
+        text: 重排把第一轮的分数再乘上一个适用于任何资料的常数
+      - id: d
+        text: 词在原文里出现过，就可以当成任何句子的相关度
+    answer: a
+    explanation: 重排的输入是第一轮已经取出的候选。没进这批的片段不会被第二次比较看见。它不代替召回，也不存在一个通用的乘数。词重叠只供手算，读不懂「不包邮」和「包邮」的差别。
+  - id: rerank-short-1
+    topicId: rerank
+    type: short
+    difficulty: intermediate
+    prompt: 为什么重排不能代替第一轮召回？第二次比较为什么只面对少量候选？
+    reference: 重排只比较已经放进候选的片段。答案如果没进这批候选，更细的比较也看不见它。第一轮负责从库里取出可能相关的片段，重排负责把这几条重新排序。第二次比较要同时看问题和原文，通常比第一轮更贵，所以不拿去扫描整个库。留几条要看自己的问题，不能从论文实验里抄一个规模。
+    rubric:
+      - 说明重排的输入是第一轮的候选
+      - 说明没进候选的片段不会被重排找到
+      - 说明第一轮负责召回，重排负责重新排序
+      - 没有把重排说成可以扫描整个库，也没有抄一个候选规模
+  - id: rerank-code-1
+    topicId: rerank
+    type: code
+    difficulty: intermediate
+    prompt: 实现 rerank。terms 是查询词，candidates 是第一轮已经取回的候选，每条有 id 和 text。limit 是重排后留下的条数。limit 小于 0 时抛出 ValueError。limit 为 0 或候选为空时返回空列表，此时不要检查词，也不要打分。需要打分时，词先去掉首尾空白，空白词抛出 ValueError。词表为空并且需要打分时，每条分数为 0，顺序保持不变。分数是有多少个词作为子串出现在 text 里。词表里重复的词按重复次数计算。按分数从高到低排序，分数相同则保持候选原来的相对顺序。limit 大于候选数时返回全部排好序的候选。返回的每条有 id、text 和 score。不要修改输入列表。这个分数只表示词是否出现。
+    examples:
+      - input: 词为「包邮」和「偏远」，候选依次是 fee「运费满 99 元包邮。」、invoice「发票在订单完成后开具。」、remote「偏远地区不包邮。」，limit 为 2
+        output: 先返回 remote，分数为 2；再返回 fee，分数为 1。invoice 不返回
+      - input: limit 为 0，词表里有一个空字符串，候选非空
+        output: 空列表
+      - input: limit 为 -1
+        output: 抛出 ValueError
+      - input: 词只有「包邮」，候选顺序仍是 fee、invoice、remote，limit 为 3
+        output: 顺序为 fee、remote、invoice。fee 和 remote 的分数都是 1，invoice 的分数是 0
+      - input: 词为「包邮」和「偏远」，limit 大于候选条数
+        output: 按分数返回全部三条，顺序是 remote、fee、invoice，分数依次是 2、1、0
+      - input: limit 为 2，词表里有空字符串，候选非空
+        output: 抛出 ValueError
+    starter: |
+      from typing import TypedDict
+
+      class Passage(TypedDict):
+          id: str
+          text: str
+
+      class RankedPassage(TypedDict):
+          id: str
+          text: str
+          score: int
+
+      def rerank(terms: list[str], candidates: list[Passage], limit: int) -> list[RankedPassage]:
+          """按词是否出现，给已经召回的候选重新排序。"""
+          raise NotImplementedError
+    hint: 先处理负数 limit，以及 limit 为 0 或空候选。需要打分时再整理词表，空白词抛出 ValueError。排序键用负分和原来的下标，分数相同就会保持原顺序。最后取前 limit 条。
+    solution: |
+      from typing import TypedDict
+
+      class Passage(TypedDict):
+          id: str
+          text: str
+
+      class RankedPassage(TypedDict):
+          id: str
+          text: str
+          score: int
+
+      def rerank(terms: list[str], candidates: list[Passage], limit: int) -> list[RankedPassage]:
+          """按词是否出现，给已经召回的候选重新排序。"""
+          if limit < 0:
+              raise ValueError("limit must be >= 0")
+          if limit == 0 or not candidates:
+              return []
+          cleaned_terms: list[str] = []
+          for term in terms:
+              stripped = term.strip()
+              if not stripped:
+                  raise ValueError("term must be non-empty")
+              cleaned_terms.append(stripped)
+          scored: list[tuple[int, int, Passage]] = []
+          for index, item in enumerate(candidates):
+              score = sum(1 for term in cleaned_terms if term in item["text"])
+              scored.append((score, index, item))
+          # 分数相同则保持候选原来的顺序。
+          scored.sort(key=lambda row: (-row[0], row[1]))
+          return [
+              {"id": item["id"], "text": item["text"], "score": score}
+              for score, _, item in scored[:limit]
+          ]
+    run: 把函数保存到本地文件，按题目里的六组输入检查顺序、空列表和 ValueError。页面不会执行这段代码。

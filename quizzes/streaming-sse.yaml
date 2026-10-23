@@ -1,0 +1,86 @@
+topicId: streaming-sse
+questions:
+  - id: streaming-sse-choice-1
+    topicId: streaming-sse
+    type: choice
+    difficulty: intermediate
+    prompt: 事件格式正确，但直到输入结束都没有 done。collect_events 应怎样结束？
+    options:
+      - id: a
+        text: 返回已经拼好的片段，当作完整回答
+      - id: b
+        text: 抛出 RuntimeError，调用方拿不到成功字符串
+      - id: c
+        text: 自动补一个 done，再返回拼接结果
+      - id: d
+        text: 返回空字符串，表示模型决定不说话
+    answer: b
+    explanation: 没有完成事件是中断，不是一份完整回复。函数抛出 RuntimeError，已到达的片段不会成为返回值。
+  - id: streaming-sse-short-1
+    topicId: streaming-sse
+    type: short
+    difficulty: intermediate
+    prompt: delta 和 done 分别怎样影响最终字符串？格式不合法和流被中断，调用方各看到哪种异常？
+    note: 按本页的事件文本写，不需要某个厂商的字段名。
+    reference: delta 的 data 按到达顺序拼进正文。done 只表示结束，它的 data 不进入正文。事件没有空行、类型未知或 delta 缺少 data 时抛出 ValueError。片段合法但没有 done 时抛出 RuntimeError，成功路径上不会返回半截字符串。
+    rubric:
+      - delta 的 data 进入拼接结果
+      - done 不把 data 放进正文
+      - 格式不合法时是 ValueError
+      - 没有完成事件时是 RuntimeError
+  - id: streaming-sse-code-1
+    topicId: streaming-sse
+    type: code
+    difficulty: intermediate
+    prompt: 实现 collect_events。每段事件以空行结束，delta 追加一行 data，done 表示结束且不把 data 拼进正文。没有 done 时抛出 RuntimeError。格式不对时抛出 ValueError。不要访问网络。
+    examples:
+      - input: 两段 delta，data 分别是「你」和「好」，然后一段 done
+        output: 你好
+      - input: 只有一段 data 为「你」的 delta，没有 done
+        output: 抛出 RuntimeError，返回值不是「你」
+      - input: 一段文本是 event 与 data 两行，但末尾没有空行
+        output: 抛出 ValueError
+    starter: |
+      def collect_events(chunks: list[str]) -> str:
+          """把本地事件片段收成完整文本。
+
+          每段必须以空行结束。event 为 delta 时追加 data。
+          event 为 done 时结束，done 的 data 不进入正文。
+          没有 done 抛出 RuntimeError。格式不对抛出 ValueError。
+          """
+          raise NotImplementedError
+    hint: 先检查 chunk 是否以空行结束。去掉这对换行时不要用 strip，否则空的 data 会丢掉冒号后面的空格。delta 才追加，done 只做标记。循环结束后还没有 done，就抛出 RuntimeError，不要返回已经拼好的片段。
+    solution: |
+      def collect_events(chunks: list[str]) -> str:
+          parts: list[str] = []
+          done = False
+          for chunk in chunks:
+              if not chunk.endswith("\n\n"):
+                  raise ValueError("事件没有以空行结束")
+              kind = ""
+              data = ""
+              data_seen = False
+              for line in chunk[:-2].splitlines():
+                  if line.startswith("event: "):
+                      kind = line[len("event: ") :]
+                  elif line.startswith("data: "):
+                      if data_seen:
+                          raise ValueError("一段事件里有多行 data")
+                      data = line[len("data: ") :]
+                      data_seen = True
+                  else:
+                      raise ValueError(f"无法识别的事件行: {line}")
+              if done and kind == "delta":
+                  raise ValueError("完成事件之后又出现了 delta")
+              if kind == "done":
+                  done = True
+                  continue
+              if kind != "delta":
+                  raise ValueError(f"未知事件类型: {kind}")
+              if not data_seen:
+                  raise ValueError("delta 事件缺少 data")
+              parts.append(data)
+          if not done:
+              raise RuntimeError("流在完成事件之前中断")
+          return "".join(parts)
+    run: 在本地构造三段以空行结束的事件，前两段是 delta，最后一段是 done，返回值应是两段 data 拼起来的字符串。拿掉 done 时应抛出 RuntimeError。末尾没有空行的片段应抛出 ValueError。页面不会执行这段代码。
